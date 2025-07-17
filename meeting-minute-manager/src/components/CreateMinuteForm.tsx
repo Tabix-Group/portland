@@ -82,9 +82,12 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       number: nextMinuteNumber,
       participants: selectedParticipants,
       status: 'draft' as const,
-      
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
+      topicGroups: JSON.stringify(formData.topicGroups),
+      topicsDiscussed: JSON.stringify(formData.topicsDiscussed),
+      decisions: JSON.stringify(formData.decisions),
+      pendingTasks: JSON.stringify(formData.pendingTasks),
     };
 
     addMinute(minute);

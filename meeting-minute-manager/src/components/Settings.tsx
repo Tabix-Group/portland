@@ -534,11 +534,11 @@ const Settings: React.FC = () => {
                     description: newTemplateDescription,
                     icon: 'FileText',
                     color: 'bg-gray-100 text-gray-800',
-                    sections: {
+                    sections: JSON.stringify({
                       topicsDiscussed: [],
                       decisions: [],
                       pendingTasks: [],
-                    },
+                    }),
                     isCustom: true,
                   });
                   setNewTemplateName('');
