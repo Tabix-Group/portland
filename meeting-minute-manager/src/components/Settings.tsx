@@ -56,15 +56,7 @@ const Settings: React.FC = () => {
   const [newGroupColor, setNewGroupColor] = useState(TOPIC_GROUP_COLORS[0]);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
 
-  // Mock tags data - in a real app this would come from the data context
-  const [tags, setTags] = useState<Tag[]>([
-    { id: 'strategy', name: 'Estrategia', color: '#3b82f6' },
-    { id: 'budget', name: 'Presupuesto', color: '#22c55e' },
-    { id: 'urgent', name: 'Urgente', color: '#ef4444' },
-    { id: 'hr', name: 'Recursos Humanos', color: '#8b5cf6' },
-    { id: 'marketing', name: 'Marketing', color: '#f97316' },
-    { id: 'kickoff', name: 'Kickoff', color: '#ec4899' },
-  ]);
+  // ...existing code...
 
   const handleAddUser = () => {
     if (newUserName && newUserEmail) {
@@ -97,25 +89,20 @@ const Settings: React.FC = () => {
 
   const handleAddTag = () => {
     if (newTagName.trim()) {
-      const newTag: Tag = {
-        id: `tag-${Date.now()}`,
+      addTag({
         name: newTagName.trim(),
         color: selectedColor
-      };
-      setTags(prev => [...prev, newTag]);
-      addTag(newTag);
+      });
       setNewTagName('');
       setSelectedColor(PREDEFINED_COLORS[0]);
     }
   };
 
   const handleUpdateTag = (id: string, updates: Partial<Tag>) => {
-    setTags(prev => prev.map(tag => tag.id === id ? { ...tag, ...updates } : tag));
     updateTag(id, updates);
   };
 
   const handleDeleteTag = (id: string) => {
-    setTags(prev => prev.filter(tag => tag.id !== id));
     deleteTag(id);
   };
 
