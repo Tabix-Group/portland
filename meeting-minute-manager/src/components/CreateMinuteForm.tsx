@@ -42,10 +42,10 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     nextMeetingDate: '',
     nextMeetingTime: '',
     nextMeetingNotes: '',
-    participantIds: user?.id ? [user.id] : [],
+    participantIds: Array.isArray(user?.id ? [user.id] : []) ? (user?.id ? [user.id] : []) : [],
     occasionalParticipants: [],
     informedPersons: [] as InformedPerson[],
-    topicGroups: [] as TopicGroup[],
+    topicGroups: [],
     // Mantener compatibilidad con versión anterior
     topicsDiscussed: [{ id: '1', text: '', mentions: [], projectIds: [] }],
     decisions: [{ id: '1', text: '', mentions: [], projectIds: [] }],
@@ -53,7 +53,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     internalNotes: '',
     tags: [],
     files: [],
-    projectIds: selectedTemplate?.projectIds || []
+    projectIds: Array.isArray(selectedTemplate?.projectIds) ? selectedTemplate?.projectIds : []
   });
 
   const userProjects = user?.role === 'admin' 
@@ -64,7 +64,9 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.meetingDate || (formData.participantIds.length === 0 && formData.occasionalParticipants.length === 0)) {
+    const participantIds = Array.isArray(formData.participantIds) ? formData.participantIds : [];
+    const occasionalParticipants = Array.isArray(formData.occasionalParticipants) ? formData.occasionalParticipants : [];
+    if (!formData.title || !formData.meetingDate || (participantIds.length === 0 && occasionalParticipants.length === 0)) {
       toast({
         title: "Error",
         description: "Por favor complete todos los campos obligatorios",
@@ -127,7 +129,8 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     }
 
     // Si hay agrupadores de temas, agregar al primer grupo, sino crear contenido general
-    if (formData.topicGroups.length > 0) {
+    const topicGroups = Array.isArray(formData.topicGroups) ? formData.topicGroups : [];
+    if (topicGroups.length > 0) {
       const firstGroup = formData.topicGroups[0];
       const updatedGroups = formData.topicGroups.map(group => {
         if (group.id === firstGroup.id) {
