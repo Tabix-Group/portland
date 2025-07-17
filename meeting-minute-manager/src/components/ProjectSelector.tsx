@@ -48,18 +48,27 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
             variant="outline"
             role="combobox"
             aria-expanded={open}
+  return (
+    <div className="space-y-3">
+      <Label>{label}</Label>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
             className="w-full justify-between"
           >
             <div className="flex items-center space-x-2">
               <Search className="h-4 w-4 text-gray-400" />
               <span className="text-gray-500">
-                {selectedProjectIds.length === 0 
-                  ? "Seleccionar proyectos..." 
-                {(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0) === 0 
-                  ? "Seleccionar proyectos..." 
-                  : `${(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0)} proyecto${(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0) > 1 ? 's' : ''} seleccionado${(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0) > 1 ? 's' : ''}`
+                {selectedProjectIds.length === 0
+                  ? "Seleccionar proyectos..."
+                  : `${selectedProjectIds.length} proyecto${selectedProjectIds.length > 1 ? 's' : ''} seleccionado${selectedProjectIds.length > 1 ? 's' : ''}`
                 }
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </div>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
@@ -70,7 +79,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               <CommandGroup>
                 {projects.map((project) => (
                   <CommandItem
-                {(Array.isArray(projects) ? projects : []).map((project) => (
+                    key={project.id}
                     value={project.name}
                     onSelect={() => handleProjectToggle(project.id)}
                   >
@@ -98,7 +107,6 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
           </Command>
         </PopoverContent>
       </Popover>
-
       {(Array.isArray(selectedProjects) ? selectedProjects.length : 0) > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedProjects.map(project => (
@@ -118,8 +126,8 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               #{project.name}
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
+                size="xs"
+                className="ml-1 p-0"
                 onClick={() => removeProject(project.id)}
               >
                 <X className="h-3 w-3" />
@@ -130,6 +138,3 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
       )}
     </div>
   );
-};
-
-export default ProjectSelector;
