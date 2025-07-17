@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import * as api from "../lib/api"
-import type { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup } from "@/types"
+import type { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup, TopicGroup, MinuteItem, Task } from "@/types"
 
 interface DataContextType {
   user: AuthUser | null
@@ -37,81 +37,78 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
 
-// Helper function to safely ensure arrays
-const safeArray = (arr: any): any[] => (Array.isArray(arr) ? arr : [])
+// Helper function to safely ensure arrays (global, single definition)
+function safeArray<T>(arr: any): T[] {
+  return Array.isArray(arr) ? arr as T[] : [];
+}
 
 // Helper function to safely ensure object with arrays
-const safeArrayObject = (obj: any, arrayKeys: string[]) => {
-  if (!obj || typeof obj !== "object") return obj
-
-  const result = { ...obj }
+function safeArrayObject(obj: any, arrayKeys: string[]) {
+  if (!obj || typeof obj !== "object") return obj;
+  const result = { ...obj };
   arrayKeys.forEach((key) => {
-    result[key] = safeArray(obj[key])
-  })
-  return result
+    result[key] = safeArray(result[key]);
+  });
+  return result;
 }
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Función global para asegurar arrays
-  function safeArray<T>(arr: any): T[] {
-    return Array.isArray(arr) ? arr as T[] : [];
-  }
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [users, setUsers] = useState<User[]>([])
-  const [projects, setProjects] = useState<Project[]>([])
-  const [minutes, setMinutes] = useState<Minute[]>([])
-  const [templates, setTemplates] = useState<MinuteTemplate[]>([])
-  const [tags, setTags] = useState<Tag[]>([])
-  const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([])
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [minutes, setMinutes] = useState<Minute[]>([]);
+  const [templates, setTemplates] = useState<MinuteTemplate[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([]);
 
   // Normalizes arrays in minute objects and topic groups
   function normalizeMinute(minute: any): Minute {
-    if (!minute) return minute
+    if (!minute) return minute;
 
     return {
       ...minute,
-      topicGroups: safeArray(minute.topicGroups).map((g) => ({
+      topicGroups: safeArray<TopicGroup>(minute.topicGroups).map((g: TopicGroup) => ({
         ...g,
-        topicsDiscussed: safeArray(g.topicsDiscussed).map((t) => ({
+        topicsDiscussed: safeArray<MinuteItem>(g.topicsDiscussed).map((t: MinuteItem) => ({
           ...t,
-          mentions: safeArray(t.mentions),
-          projectIds: safeArray(t.projectIds),
+          mentions: safeArray<string>(t.mentions),
+          projectIds: safeArray<string>(t.projectIds),
         })),
-        decisions: safeArray(g.decisions).map((d) => ({
+        decisions: safeArray<MinuteItem>(g.decisions).map((d: MinuteItem) => ({
           ...d,
-          mentions: safeArray(d.mentions),
-          projectIds: safeArray(d.projectIds),
+          mentions: safeArray<string>(d.mentions),
+          projectIds: safeArray<string>(d.projectIds),
         })),
-        pendingTasks: safeArray(g.pendingTasks).map((t) => ({
+        pendingTasks: safeArray<Task>(g.pendingTasks).map((t: Task) => ({
           ...t,
-          mentions: safeArray(t.mentions),
-          projectIds: safeArray(t.projectIds),
+          mentions: safeArray<string>(t.mentions),
+          projectIds: safeArray<string>(t.projectIds),
         })),
       })),
-      topicsDiscussed: safeArray(minute.topicsDiscussed).map((t) => ({
+      topicsDiscussed: safeArray<MinuteItem>(minute.topicsDiscussed).map((t: MinuteItem) => ({
         ...t,
-        mentions: safeArray(t.mentions),
-        projectIds: safeArray(t.projectIds),
+        mentions: safeArray<string>(t.mentions),
+        projectIds: safeArray<string>(t.projectIds),
       })),
-      decisions: safeArray(minute.decisions).map((d) => ({
+      decisions: safeArray<MinuteItem>(minute.decisions).map((d: MinuteItem) => ({
         ...d,
-        mentions: safeArray(d.mentions),
-        projectIds: safeArray(d.projectIds),
+        mentions: safeArray<string>(d.mentions),
+        projectIds: safeArray<string>(d.projectIds),
       })),
-      pendingTasks: safeArray(minute.pendingTasks).map((t) => ({
+      pendingTasks: safeArray<Task>(minute.pendingTasks).map((t: Task) => ({
         ...t,
-        mentions: safeArray(t.mentions),
-        projectIds: safeArray(t.projectIds),
+        mentions: safeArray<string>(t.mentions),
+        projectIds: safeArray<string>(t.projectIds),
       })),
-      participants: safeArray(minute.participants),
-      occasionalParticipants: safeArray(minute.occasionalParticipants),
-      informedPersons: safeArray(minute.informedPersons),
-      tags: safeArray(minute.tags),
-      files: safeArray(minute.files),
-      projectIds: safeArray(minute.projectIds),
-      participantIds: safeArray(minute.participantIds),
-      externalMentions: safeArray(minute.externalMentions),
-    }
+      participants: safeArray<string>(minute.participants),
+      occasionalParticipants: safeArray<string>(minute.occasionalParticipants),
+      informedPersons: safeArray<string>(minute.informedPersons),
+      tags: safeArray<string>(minute.tags),
+      files: safeArray<string>(minute.files),
+      projectIds: safeArray<string>(minute.projectIds),
+      participantIds: safeArray<string>(minute.participantIds),
+      externalMentions: safeArray<string>(minute.externalMentions),
+    };
   }
 
   useEffect(() => {
