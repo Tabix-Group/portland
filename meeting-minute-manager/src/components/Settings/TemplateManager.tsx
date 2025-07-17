@@ -56,20 +56,31 @@ const TemplateManager: React.FC = () => {
   });
 
   const handleAddTemplate = () => {
-    if (!newTemplate.name || !newTemplate.description || !newTemplate.icon || !newTemplate.color || !Array.isArray(newTemplate.topicGroups) || newTemplate.topicGroups.length === 0) {
+    if (!newTemplate.name || !newTemplate.description || !newTemplate.icon || !newTemplate.color) {
       // Show error or return
       return;
     }
+    // Limpiar secciones: eliminar strings vacíos
+    const cleanArray = (arr?: string[]) => Array.isArray(arr) ? arr.filter(s => s && s.trim() !== '') : [];
     const payload: any = {
       name: newTemplate.name,
       description: newTemplate.description,
       icon: newTemplate.icon,
       color: newTemplate.color,
-      sections: newTemplate.sections,
+      sections: {
+        topicsDiscussed: cleanArray(newTemplate.sections?.topicsDiscussed),
+        decisions: cleanArray(newTemplate.sections?.decisions),
+        pendingTasks: cleanArray(newTemplate.sections?.pendingTasks)
+      },
       isCustom: true
     };
     if (Array.isArray(newTemplate.topicGroups) && newTemplate.topicGroups.length > 0) {
-      payload.topicGroups = newTemplate.topicGroups.map(g => ({ id: g.id, name: g.name, color: g.color, description: g.description || "" }));
+      payload.topicGroups = newTemplate.topicGroups.map(g => ({
+        id: g.id,
+        name: g.name,
+        color: g.color,
+        description: g.description || ""
+      }));
     }
     addTemplate(payload);
     setNewTemplate({
