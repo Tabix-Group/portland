@@ -56,22 +56,34 @@ const TemplateManager: React.FC = () => {
   });
 
   const handleAddTemplate = () => {
-    if (newTemplate.name && newTemplate.description) {
-      addTemplate(newTemplate as Omit<MinuteTemplate, 'id'>);
-      setNewTemplate({
-        name: '',
-        description: '',
-        icon: 'Calendar',
-        color: 'bg-blue-100 text-blue-800',
-        sections: {
-          topicsDiscussed: [''],
-          decisions: [''],
-          pendingTasks: ['']
-        },
-        topicGroups: [],
-        isCustom: true
-      });
+    if (!newTemplate.name || !newTemplate.description || !newTemplate.icon || !newTemplate.color || !Array.isArray(newTemplate.topicGroups) || newTemplate.topicGroups.length === 0) {
+      // Show error or return
+      return;
     }
+    const payload = {
+      name: newTemplate.name,
+      description: newTemplate.description,
+      icon: newTemplate.icon,
+      color: newTemplate.color,
+      topicGroups: newTemplate.topicGroups.map(g => ({ name: g.name, color: g.color, description: g.description || "" })),
+      sections: JSON.stringify(newTemplate.sections),
+      isCustom: true
+    };
+    addTemplate(payload);
+    setNewTemplate({
+      name: '',
+      description: '',
+      icon: 'Calendar',
+      color: 'bg-blue-100 text-blue-800',
+      sections: {
+        topicsDiscussed: [''],
+        decisions: [''],
+        pendingTasks: ['']
+      },
+      topicGroups: [],
+      isCustom: true
+    });
+  }
   };
 
   const updateSection = (sectionType: keyof MinuteTemplate['sections'], index: number, value: string) => {

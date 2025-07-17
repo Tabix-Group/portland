@@ -77,11 +77,15 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     const selectedParticipants = users.filter(u => formData.participantIds.includes(u.id));
     const allParticipantIds = [...formData.participantIds, ...formData.occasionalParticipants.map(p => p.id)];
 
+    if (!formData.text || selectedParticipants.length === 0) {
+      // Show error or return
+      return;
+    }
     const minute = {
-      ...formData,
+      text: formData.text,
       number: nextMinuteNumber,
       participants: selectedParticipants,
-      status: 'draft' as const,
+      status: 'draft',
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
       topicGroups: formData.topicGroups,
