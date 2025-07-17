@@ -60,18 +60,17 @@ const TemplateManager: React.FC = () => {
       // Show error or return
       return;
     }
-    const topicGroups = Array.isArray(newTemplate.topicGroups) && newTemplate.topicGroups.length > 0
-      ? newTemplate.topicGroups.map(g => ({ id: g.id, name: g.name, color: g.color, description: g.description || "" }))
-      : undefined;
-    const payload = {
+    const payload: any = {
       name: newTemplate.name,
       description: newTemplate.description,
       icon: newTemplate.icon,
       color: newTemplate.color,
-      ...(topicGroups ? { topicGroups } : {}),
       sections: newTemplate.sections,
       isCustom: true
     };
+    if (Array.isArray(newTemplate.topicGroups) && newTemplate.topicGroups.length > 0) {
+      payload.topicGroups = newTemplate.topicGroups.map(g => ({ id: g.id, name: g.name, color: g.color, description: g.description || "" }));
+    }
     addTemplate(payload);
     setNewTemplate({
       name: '',

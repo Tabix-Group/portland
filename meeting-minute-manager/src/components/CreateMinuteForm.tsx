@@ -75,34 +75,39 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     }
 
     const selectedParticipants = users.filter(u => formData.participantIds.includes(u.id));
-    const allParticipantIds = [...formData.participantIds, ...formData.occasionalParticipants.map(p => p.id)];
-
-    if (!formData.text || selectedParticipants.length === 0) {
-      // Show error or return
-      return;
-    }
+    // Construir el objeto minute con todos los campos relevantes
     const minute = {
-      text: formData.text,
       number: nextMinuteNumber,
+      title: formData.title,
+      meetingDate: formData.meetingDate,
+      meetingTime: formData.meetingTime,
+      nextMeetingDate: formData.nextMeetingDate,
+      nextMeetingTime: formData.nextMeetingTime,
+      nextMeetingNotes: formData.nextMeetingNotes,
+      participantIds: formData.participantIds,
       participants: selectedParticipants,
+      occasionalParticipants: formData.occasionalParticipants,
+      informedPersons: formData.informedPersons,
+      topicGroups: formData.topicGroups,
+      topicsDiscussed: formData.topicsDiscussed,
+      decisions: formData.decisions,
+      pendingTasks: formData.pendingTasks,
+      internalNotes: formData.internalNotes,
+      tags: formData.tags,
+      files: formData.files,
       status: 'draft',
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
-      topicGroups: formData.topicGroups,
-      sections: JSON.stringify({
-        topicsDiscussed: formData.topicsDiscussed,
-        decisions: formData.decisions,
-        pendingTasks: formData.pendingTasks,
-      }),
+      projectIds: formData.projectIds,
     };
 
     addMinute(minute);
-    
+
     toast({
       title: "Minuta creada",
       description: `La minuta #${nextMinuteNumber} ha sido creada exitosamente`,
     });
-    
+
     onSuccess();
   };
 
