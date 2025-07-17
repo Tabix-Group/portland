@@ -65,8 +65,8 @@ const TemplateManager: React.FC = () => {
       description: newTemplate.description,
       icon: newTemplate.icon,
       color: newTemplate.color,
-      topicGroups: newTemplate.topicGroups.map(g => ({ name: g.name, color: g.color, description: g.description || "" })),
-      sections: JSON.stringify(newTemplate.sections),
+      topicGroups: newTemplate.topicGroups.map(g => ({ id: g.id, name: g.name, color: g.color, description: g.description || "" })),
+      sections: newTemplate.sections,
       isCustom: true
     };
     addTemplate(payload);
