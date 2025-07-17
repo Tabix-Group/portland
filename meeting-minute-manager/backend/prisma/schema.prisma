@@ -122,6 +122,7 @@ model MinuteTemplate {
   isCustom    Boolean
   createdBy   String?
   projectIds  String[]
+  sections    Json
   topicGroups TemplateTopicGroup[]
 }
 

@@ -17,17 +17,26 @@ router.get('/:id', async (req, res) => {
 
 // POST create template
 router.post('/', async (req, res) => {
-  const { topicGroups, ...data } = req.body;
-  const template = await prisma.minuteTemplate.create({
-    data: {
-      ...data,
-      topicGroups: {
-        create: topicGroups || []
-      }
-    },
-    include: { topicGroups: true }
-  });
-  res.json(template);
+  try {
+    const { topicGroups, ...data } = req.body;
+    const template = await prisma.minuteTemplate.create({
+      data: {
+        ...data,
+        topicGroups: {
+          create: Array.isArray(topicGroups) ? topicGroups.map(g => ({
+            name: g.name,
+            color: g.color,
+            description: g.description || ""
+          })) : []
+        }
+      },
+      include: { topicGroups: true }
+    });
+    res.json(template);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
 });
 
 // PUT update template

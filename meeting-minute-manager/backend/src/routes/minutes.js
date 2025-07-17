@@ -4,8 +4,9 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // GET all minute items
+// GET all minutes
 router.get('/', async (req, res) => {
-  const minutes = await prisma.minuteItem.findMany();
+  const minutes = await prisma.minute.findMany();
   res.json(minutes);
 });
 

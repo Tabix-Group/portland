@@ -23,14 +23,17 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <head>
+        <link rel="icon" type="image/png" href="/favicon.png" />
+      </head>
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
+              <img src="/favicon.png" alt="Favicon" className="h-8 w-8 mr-2" />
               <h1 className="text-xl font-bold text-gray-900">Grupo Portland</h1>
               <span className="text-sm text-gray-500">Gestión de Minutas</span>
             </div>
-            
             <nav className="hidden md:flex space-x-8">
               {navigation.map((item) => {
                 const Icon = item.icon;
@@ -50,7 +53,6 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
                 );
               })}
             </nav>
-
             <div className="flex items-center space-x-4">
               <div className="text-sm">
                 <p className="font-medium text-gray-900">{user?.name}</p>
@@ -69,7 +71,6 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
           </div>
         </div>
       </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
