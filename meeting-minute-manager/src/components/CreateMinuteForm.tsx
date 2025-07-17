@@ -91,9 +91,9 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       informedPersons: cleanArray(formData.informedPersons),
       topicGroups: Array.isArray(formData.topicGroups) ? formData.topicGroups.map(g => ({
         ...g,
-        topicsDiscussed: cleanArray(g.topicsDiscussed),
-        decisions: cleanArray(g.decisions),
-        pendingTasks: cleanArray(g.pendingTasks)
+        topicsDiscussed: Array.isArray(g.topicsDiscussed) ? cleanArray(g.topicsDiscussed) : [],
+        decisions: Array.isArray(g.decisions) ? cleanArray(g.decisions) : [],
+        pendingTasks: Array.isArray(g.pendingTasks) ? cleanArray(g.pendingTasks) : []
       })) : [],
       topicsDiscussed: cleanArray(formData.topicsDiscussed),
       decisions: cleanArray(formData.decisions),
