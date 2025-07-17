@@ -96,8 +96,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // MINUTES CRUD
   const addMinute = async (minute: Omit<Minute, 'id'>) => {
-    const created = await api.createMinute({ ...minute, createdBy: user?.id || '' });
-    setMinutes(prev => [...prev, created]);
+    // Inicializa arrays vacíos si no existen
+    const safeMinute = {
+      ...minute,
+      topicGroups: Array.isArray(minute.topicGroups) ? minute.topicGroups : [],
+      topicsDiscussed: Array.isArray(minute.topicsDiscussed) ? minute.topicsDiscussed : [],
+      decisions: Array.isArray(minute.decisions) ? minute.decisions : [],
+      pendingTasks: Array.isArray(minute.pendingTasks) ? minute.pendingTasks : [],
+      participants: Array.isArray(minute.participants) ? minute.participants : [],
+      occasionalParticipants: Array.isArray(minute.occasionalParticipants) ? minute.occasionalParticipants : [],
+      informedPersons: Array.isArray(minute.informedPersons) ? minute.informedPersons : [],
+      tags: Array.isArray(minute.tags) ? minute.tags : [],
+      files: Array.isArray(minute.files) ? minute.files : [],
+    };
+    const created = await api.createMinute({ ...safeMinute, createdBy: user?.id || '' });
+    setMinutes(prev => [...prev, normalizeMinute(created)]);
   };
   const updateMinute = async (id: string, updates: Partial<Minute>) => {
     const updated = await api.updateMinute(id, updates);
