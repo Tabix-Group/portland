@@ -1,3 +1,28 @@
+model Minute {
+  id          String   @id @default(uuid())
+  number      Int
+  title       String
+  meetingDate String
+  meetingTime String
+  nextMeetingDate String?
+  nextMeetingTime String?
+  nextMeetingNotes String?
+  participantIds String[]
+  participants Json
+  occasionalParticipants Json
+  informedPersons Json
+  topicGroups Json
+  topicsDiscussed Json
+  decisions Json
+  pendingTasks Json
+  internalNotes String?
+  tags Json
+  files Json
+  status String
+  createdBy String
+  createdAt DateTime @default(now())
+  projectIds String[]
+}
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 

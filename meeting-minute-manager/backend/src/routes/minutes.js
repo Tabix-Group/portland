@@ -15,10 +15,15 @@ router.get('/:id', async (req, res) => {
   res.json(minute);
 });
 
-// POST create minute item
+// POST create minute
 router.post('/', async (req, res) => {
-  const minute = await prisma.minuteItem.create({ data: req.body });
-  res.json(minute);
+  try {
+    const minute = await prisma.minute.create({ data: req.body });
+    res.json(minute);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
 });
 
 // PUT update minute item
