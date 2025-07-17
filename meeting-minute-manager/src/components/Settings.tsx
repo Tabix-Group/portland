@@ -31,7 +31,7 @@ const TOPIC_GROUP_COLORS = [
 
 const Settings: React.FC = () => {
   const { 
-    users, projects, templates, globalTopicGroups,
+    users, projects, templates, tags, globalTopicGroups,
     addUser, updateUser, addProject, updateProject, 
     addTemplate, updateTemplate, deleteTemplate,
     addTag, updateTag, deleteTag,
