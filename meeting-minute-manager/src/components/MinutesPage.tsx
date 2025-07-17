@@ -53,7 +53,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     if (user?.role === 'admin' || !user?.hasLimitedAccess) {
       return projects;
     }
-    return projects.filter(project => user.projectIds.includes(project.id));
+    return projects.filter(project => Array.isArray(user.projectIds) && user.projectIds.includes(project.id));
   }, [projects, user]);
 
   // Filter minutes based on user permissions and project access, sorted by date (newest first)
@@ -64,8 +64,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         if (user?.role === 'admin') return true;
         
         // Users with limited access can only see minutes from their assigned projects
-        if (user?.hasLimitedAccess && minute.projectIds && minute.projectIds.length > 0) {
-          return minute.projectIds.some(projectId => user.projectIds.includes(projectId));
+        if (user?.hasLimitedAccess && Array.isArray(minute.projectIds) && minute.projectIds.length > 0) {
+          return minute.projectIds.some(projectId => Array.isArray(user.projectIds) && user.projectIds.includes(projectId));
         }
         
         // Regular users can see minutes they participate in
@@ -98,8 +98,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
       } else if (typeof minute.topicGroups === 'object' && minute.topicGroups !== null) {
         topicGroups = Object.values(minute.topicGroups);
       }
-      const matchesTags = filterTags.length === 0 || filterTags.some(tagId => tags.some(tag => tag.id === tagId));
-      const matchesTopicGroups = filterTopicGroups.length === 0 || filterTopicGroups.some(groupId => topicGroups.some(group => group.id === groupId));
+      const matchesTags = filterTags.length === 0 || filterTags.some(tagId => Array.isArray(tags) && tags.some(tag => tag.id === tagId));
+      const matchesTopicGroups = filterTopicGroups.length === 0 || filterTopicGroups.some(groupId => Array.isArray(topicGroups) && topicGroups.some(group => group.id === groupId));
       return matchesSearch && matchesProject && matchesStatus && matchesTags && matchesTopicGroups;
     });
   }, [userMinutes, searchTerm, filterProject, filterStatus, filterTags, filterTopicGroups]);
@@ -443,7 +443,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                           </div>
                           <div className="flex items-center space-x-1">
                             <Users className="h-4 w-4" />
-                        <span>{Array.isArray(minute.participants) ? minute.participants.length : 0} participantes</span>
+                        <span>{(Array.isArray(minute.participants) ? minute.participants.length : 0)} participantes</span>
                           </div>
                         </div>
                         

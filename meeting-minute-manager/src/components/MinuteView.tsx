@@ -86,10 +86,10 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                   <span>{new Date(minute.meetingDate).toLocaleDateString()}</span>
                   {minute.meetingTime && <span>- {minute.meetingTime}</span>}
                 </div>
-                <div className="flex items-center space-x-1">
-                  <Users className="h-4 w-4" />
-                  <span>{minute.participants.length + minute.occasionalParticipants.length} participantes</span>
-                </div>
+              <div className="flex items-center space-x-1">
+                <Users className="h-4 w-4" />
+                <span>{(Array.isArray(minute.participants) ? minute.participants.length : 0) + (Array.isArray(minute.occasionalParticipants) ? minute.occasionalParticipants.length : 0)} participantes</span>
+              </div>
               </div>
             </div>
             <Badge className={getStatusColor(minute.status)}>
@@ -100,7 +100,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
         </CardHeader>
         <CardContent>
           {/* Proyectos relacionados */}
-          {minute.projectIds && minute.projectIds.length > 0 && (
+          {Array.isArray(minute.projectIds) && minute.projectIds.length > 0 && (
             <div className="mb-4">
               <h4 className="font-medium mb-2">Proyectos relacionados:</h4>
               <div className="flex flex-wrap gap-2">
@@ -117,7 +117,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
           )}
 
           {/* Etiquetas */}
-          {minute.tags && minute.tags.length > 0 && (
+          {Array.isArray(minute.tags) && minute.tags.length > 0 && (
             <div className="mb-4">
               <div className="flex flex-wrap gap-2">
                 {minute.tags.map((tag) => (
@@ -153,7 +153,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
       </Card>
 
       {/* Personas Informadas */}
-      {minute.informedPersons && minute.informedPersons.length > 0 && (
+      {Array.isArray(minute.informedPersons) && minute.informedPersons.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -180,7 +180,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
       )}
 
       {/* Agrupadores de Temas */}
-      {minute.topicGroups && minute.topicGroups.length > 0 && (
+      {Array.isArray(minute.topicGroups) && minute.topicGroups.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center space-x-2">
             <FolderOpen className="h-5 w-5 text-blue-600" />
@@ -200,7 +200,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Temas del grupo */}
-                {group.topicsDiscussed.length > 0 && (
+                {Array.isArray(group.topicsDiscussed) && group.topicsDiscussed.length > 0 && (
                   <div>
                     <h4 className="font-medium text-blue-600 mb-2">Temas Tratados</h4>
                     <div className="space-y-2">
@@ -223,7 +223,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                 )}
 
                 {/* Decisiones del grupo */}
-                {group.decisions.length > 0 && (
+                {Array.isArray(group.decisions) && group.decisions.length > 0 && (
                   <div>
                     <h4 className="font-medium text-green-600 mb-2">Decisiones</h4>
                     <div className="space-y-2">
@@ -246,7 +246,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                 )}
 
                 {/* Tareas del grupo */}
-                {group.pendingTasks.length > 0 && (
+                {Array.isArray(group.pendingTasks) && group.pendingTasks.length > 0 && (
                   <div>
                     <h4 className="font-medium text-orange-600 mb-2">Tareas Pendientes</h4>
                     <div className="space-y-2">
@@ -327,7 +327,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
       )}
 
       {/* Mantener secciones tradicionales si no hay agrupadores */}
-      {(!minute.topicGroups || minute.topicGroups.length === 0) && (
+      {(!Array.isArray(minute.topicGroups) || minute.topicGroups.length === 0) && (
         <>
           {/* Temas tratados */}
           <Card>
@@ -335,7 +335,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
               <CardTitle>Temas Tratados</CardTitle>
             </CardHeader>
             <CardContent>
-              {minute.topicsDiscussed.length === 0 ? (
+              {(!Array.isArray(minute.topicsDiscussed) || minute.topicsDiscussed.length === 0) ? (
                 <p className="text-gray-500">No hay temas registrados</p>
               ) : (
                 <div className="space-y-3">
@@ -364,7 +364,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
               <CardTitle>Decisiones</CardTitle>
             </CardHeader>
             <CardContent>
-              {minute.decisions.length === 0 ? (
+              {(!Array.isArray(minute.decisions) || minute.decisions.length === 0) ? (
                 <p className="text-gray-500">No hay decisiones registradas</p>
               ) : (
                 <div className="space-y-3">
@@ -393,7 +393,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
               <CardTitle>Tareas Pendientes</CardTitle>
             </CardHeader>
             <CardContent>
-              {minute.pendingTasks.length === 0 ? (
+              {(!Array.isArray(minute.pendingTasks) || minute.pendingTasks.length === 0) ? (
                 <p className="text-gray-500">No hay tareas pendientes</p>
               ) : (
                 <div className="space-y-3">
@@ -435,7 +435,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
       )}
 
       {/* Menciones externas */}
-      {minute.externalMentions && minute.externalMentions.length > 0 && (
+      {Array.isArray(minute.externalMentions) && minute.externalMentions.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Menciones Externas</CardTitle>
