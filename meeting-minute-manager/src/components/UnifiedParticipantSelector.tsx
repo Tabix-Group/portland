@@ -22,10 +22,10 @@ interface UnifiedParticipantSelectorProps {
 }
 
 const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
-  users,
-  selectedUserIds,
-  occasionalParticipants,
-  informedPersons,
+  users = Array.isArray(users) ? users : [],
+  selectedUserIds = Array.isArray(selectedUserIds) ? selectedUserIds : [],
+  occasionalParticipants = Array.isArray(occasionalParticipants) ? occasionalParticipants : [],
+  informedPersons = Array.isArray(informedPersons) ? informedPersons : [],
   onUserSelectionChange,
   onOccasionalParticipantsChange,
   onInformedPersonsChange
