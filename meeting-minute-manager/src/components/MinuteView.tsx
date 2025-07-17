@@ -339,7 +339,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                 <p className="text-gray-500">No hay temas registrados</p>
               ) : (
                 <div className="space-y-3">
-                  {minute.topicsDiscussed.map((topic, index) => (
+                  {(Array.isArray(minute.topicsDiscussed) ? minute.topicsDiscussed : []).map((topic, index) => (
                     <div key={topic.id} className="border-l-4 border-blue-200 pl-4">
                       <div className="flex items-start space-x-2">
                         <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
@@ -368,7 +368,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                 <p className="text-gray-500">No hay decisiones registradas</p>
               ) : (
                 <div className="space-y-3">
-                  {minute.decisions.map((decision, index) => (
+                  {(Array.isArray(minute.decisions) ? minute.decisions : []).map((decision, index) => (
                     <div key={decision.id} className="border-l-4 border-green-200 pl-4">
                       <div className="flex items-start space-x-2">
                         <span className="text-sm font-medium text-green-600">#{index + 1}</span>
@@ -397,7 +397,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                 <p className="text-gray-500">No hay tareas pendientes</p>
               ) : (
                 <div className="space-y-3">
-                  {minute.pendingTasks.map((task, index) => (
+                  {(Array.isArray(minute.pendingTasks) ? minute.pendingTasks : []).map((task, index) => (
                     <div key={task.id} className="border-l-4 border-orange-200 pl-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-2 flex-1">
