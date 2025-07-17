@@ -69,8 +69,8 @@ const TemplateManager: React.FC = () => {
       color: newTemplate.color,
       sections: {
         topicsDiscussed: cleanArray(newTemplate.sections?.topicsDiscussed),
-        decisions: cleanArray(newTemplate.sections?.decisions),
-        pendingTasks: cleanArray(newTemplate.sections?.pendingTasks)
+        decisions: Array.isArray(newTemplate.sections?.decisions) ? cleanArray(newTemplate.sections?.decisions) : [],
+        pendingTasks: Array.isArray(newTemplate.sections?.pendingTasks) ? cleanArray(newTemplate.sections?.pendingTasks) : []
       },
       isCustom: true
     };

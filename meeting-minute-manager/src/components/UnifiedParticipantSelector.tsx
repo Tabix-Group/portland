@@ -146,7 +146,7 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
               )}
             </div>
 
-            {selectedUserIds.length > 0 && (
+            {Array.isArray(selectedUserIds) && selectedUserIds.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-sm text-gray-600">Usuarios internos seleccionados ({selectedUserIds.length}):</Label>
                 <div className="flex flex-wrap gap-2">

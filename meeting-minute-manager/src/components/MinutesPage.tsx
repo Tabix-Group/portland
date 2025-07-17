@@ -31,7 +31,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     const tagMap = new Map();
     minutes.forEach(minute => {
       (Array.isArray(minute.tags) ? minute.tags : []).forEach(tag => {
-        tagMap.set(tag.id, tag);
+        if (tag && tag.id) tagMap.set(tag.id, tag);
       });
     });
     return Array.from(tagMap.values());
@@ -42,7 +42,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     const topicGroupMap = new Map();
     minutes.forEach(minute => {
       (Array.isArray(minute.topicGroups) ? minute.topicGroups : []).forEach(group => {
-        topicGroupMap.set(group.id, group);
+        if (group && group.id) topicGroupMap.set(group.id, group);
       });
     });
     return Array.from(topicGroupMap.values());

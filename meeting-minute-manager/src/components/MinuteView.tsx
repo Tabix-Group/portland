@@ -186,7 +186,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
             <FolderOpen className="h-5 w-5 text-blue-600" />
             <span>Contenido por Agrupadores</span>
           </h3>
-          {minute.topicGroups.map((group) => (
+          {(Array.isArray(minute.topicGroups) ? minute.topicGroups : []).map((group) => (
             <Card key={group.id} className="border-l-4" style={{ borderLeftColor: group.color }}>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -194,7 +194,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                     {group.name}
                   </Badge>
                   <span className="text-sm text-gray-500">
-                    {group.topicsDiscussed.length + group.decisions.length + group.pendingTasks.length} elementos
+                    {(Array.isArray(group.topicsDiscussed) ? group.topicsDiscussed.length : 0) + (Array.isArray(group.decisions) ? group.decisions.length : 0) + (Array.isArray(group.pendingTasks) ? group.pendingTasks.length : 0)} elementos
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -204,7 +204,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                   <div>
                     <h4 className="font-medium text-blue-600 mb-2">Temas Tratados</h4>
                     <div className="space-y-2">
-                      {group.topicsDiscussed.map((topic, index) => (
+                {(Array.isArray(group.topicsDiscussed) ? group.topicsDiscussed : []).map((topic, index) => (
                         <div key={topic.id} className="border-l-4 border-blue-200 pl-4">
                           <div className="flex items-start space-x-2">
                             <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
@@ -227,7 +227,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                   <div>
                     <h4 className="font-medium text-green-600 mb-2">Decisiones</h4>
                     <div className="space-y-2">
-                      {group.decisions.map((decision, index) => (
+                {(Array.isArray(group.decisions) ? group.decisions : []).map((decision, index) => (
                         <div key={decision.id} className="border-l-4 border-green-200 pl-4">
                           <div className="flex items-start space-x-2">
                             <span className="text-sm font-medium text-green-600">#{index + 1}</span>
@@ -250,7 +250,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
                   <div>
                     <h4 className="font-medium text-orange-600 mb-2">Tareas Pendientes</h4>
                     <div className="space-y-2">
-                      {group.pendingTasks.map((task, index) => (
+                {(Array.isArray(group.pendingTasks) ? group.pendingTasks : []).map((task, index) => (
                         <div key={task.id} className="border-l-4 border-orange-200 pl-4">
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-2 flex-1">
