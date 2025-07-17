@@ -46,9 +46,17 @@ export const createAttachment = (data: any) => request("/attachments", { method:
 export const updateAttachment = (id: string, data: any) => request(`/attachments/${id}`, { method: "PUT", body: JSON.stringify(data) });
 export const deleteAttachment = (id: string) => request(`/attachments/${id}`, { method: "DELETE" });
 
-// Tags
-export const getTags = () => request("/tags");
-export const getTag = (id: string) => request(`/tags/${id}`);
-export const createTag = (data: any) => request("/tags", { method: "POST", body: JSON.stringify(data) });
-export const updateTag = (id: string, data: any) => request(`/tags/${id}`, { method: "PUT", body: JSON.stringify(data) });
-export const deleteTag = (id: string) => request(`/tags/${id}`, { method: "DELETE" });
+
+// Templates
+export const getTemplates = () => request("/templates");
+export const getTemplate = (id: string) => request(`/templates/${id}`);
+export const createTemplate = (data: any) => request("/templates", { method: "POST", body: JSON.stringify(data) });
+export const updateTemplate = (id: string, data: any) => request(`/templates/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteTemplate = (id: string) => request(`/templates/${id}`, { method: "DELETE" });
+
+// Global Topic Groups
+export const getGlobalTopicGroups = () => request("/globalTopicGroups");
+export const getGlobalTopicGroup = (id: string) => request(`/globalTopicGroups/${id}`);
+export const createGlobalTopicGroup = (data: any) => request("/globalTopicGroups", { method: "POST", body: JSON.stringify(data) });
+export const updateGlobalTopicGroup = (id: string, data: any) => request(`/globalTopicGroups/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteGlobalTopicGroup = (id: string) => request(`/globalTopicGroups/${id}`, { method: "DELETE" });

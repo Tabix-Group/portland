@@ -50,102 +50,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [users, setUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [minutes, setMinutes] = useState<Minute[]>([]);
+  const [templates, setTemplates] = useState<MinuteTemplate[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([]);
 
   useEffect(() => {
     api.getUsers().then(setUsers);
     api.getProjects().then(setProjects);
     api.getMinutes().then(setMinutes);
+    api.getTemplates().then(setTemplates);
+    api.getTags().then(setTags);
+    api.getGlobalTopicGroups().then(setGlobalTopicGroups);
   }, []);
-  const [templates, setTemplates] = useState<MinuteTemplate[]>([
-    {
-      id: '1',
-      name: 'Reunión de Proyecto',
-      description: 'Plantilla para reuniones de seguimiento de proyecto',
-      icon: 'Briefcase',
-      color: 'bg-blue-100 text-blue-800',
-      sections: {
-        topicsDiscussed: ['Avance del proyecto', 'Bloqueos identificados'],
-        decisions: ['Decisión sobre arquitectura', 'Aprobación de presupuesto'],
-        pendingTasks: ['Completar documentación', 'Revisar código']
-      },
-      topicGroups: [
-        {
-          id: 'tg1',
-          name: 'DESARROLLO',
-          color: '#3b82f6',
-          description: 'Temas relacionados con desarrollo de software'
-        },
-        {
-          id: 'tg2',
-          name: 'TESTING',
-          color: '#ef4444',
-          description: 'Temas relacionados con pruebas y calidad'
-        }
-      ],
-      isCustom: false
-    },
-    {
-      id: '2',
-      name: 'Reunión Administrativa',
-      description: 'Plantilla para reuniones administrativas',
-      icon: 'Users',
-      color: 'bg-green-100 text-green-800',
-      sections: {
-        topicsDiscussed: ['Presupuesto mensual', 'Recursos humanos'],
-        decisions: ['Aprobación de gastos', 'Contrataciones'],
-        pendingTasks: ['Presentar informes', 'Revisar contratos']
-      },
-      topicGroups: [
-        {
-          id: 'tg3',
-          name: 'PRESUPUESTO',
-          color: '#22c55e',
-          description: 'Temas relacionados con presupuesto y finanzas'
-        },
-        {
-          id: 'tg4',
-          name: 'RECURSOS HUMANOS',
-          color: '#f59e0b',
-          description: 'Temas relacionados con personal y contrataciones'
-        }
-      ],
-      isCustom: false
-    }
-  ]);
-  const [tags, setTags] = useState<Tag[]>([
-    { id: '1', name: 'Urgente', color: '#ef4444' },
-    { id: '2', name: 'Importante', color: '#f59e0b' },
-    { id: '3', name: 'En revisión', color: '#3b82f6' }
-  ]);
-  const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([
-    {
-      id: 'gtg1',
-      name: 'DESARROLLO',
-      color: '#3b82f6',
-      description: 'Temas relacionados con desarrollo de software',
-      isActive: true,
-      createdBy: '1',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'gtg2',
-      name: 'TESTING',
-      color: '#ef4444',
-      description: 'Temas relacionados con pruebas y calidad',
-      isActive: true,
-      createdBy: '1',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'gtg3',
-      name: 'PRESUPUESTO',
-      color: '#22c55e',
-      description: 'Temas relacionados con presupuesto y finanzas',
-      isActive: true,
-      createdBy: '1',
-      createdAt: new Date().toISOString()
-    }
-  ]);
 
   const login = (user: AuthUser) => {
     setUser(user);
@@ -199,17 +115,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
   // TEMPLATES CRUD
-  const addTemplate = (template: Omit<MinuteTemplate, 'id'>) => {
-    const newTemplate: MinuteTemplate = {
-      ...template,
-      id: Date.now().toString()
-    };
-    setTemplates(prev => [...prev, newTemplate]);
+  const addTemplate = async (template: Omit<MinuteTemplate, 'id'>) => {
+    const created = await api.createTemplate(template);
+    setTemplates(prev => [...prev, created]);
   };
-  const updateTemplate = (id: string, updates: Partial<MinuteTemplate>) => {
-    setTemplates(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  const updateTemplate = async (id: string, updates: Partial<MinuteTemplate>) => {
+    const updated = await api.updateTemplate(id, updates);
+    setTemplates(prev => prev.map(t => t.id === id ? updated : t));
   };
-  const deleteTemplate = (id: string) => {
+  const deleteTemplate = async (id: string) => {
+    await api.deleteTemplate(id);
     setTemplates(prev => prev.filter(t => t.id !== id));
   };
 
@@ -228,19 +143,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // GLOBAL TOPIC GROUPS CRUD
-  const addGlobalTopicGroup = (group: Omit<GlobalTopicGroup, 'id'>) => {
-    const newGroup: GlobalTopicGroup = {
-      ...group,
-      id: `gtg-${Date.now()}`,
-      createdBy: user?.id || '',
-      createdAt: new Date().toISOString()
-    };
-    setGlobalTopicGroups(prev => [...prev, newGroup]);
+  const addGlobalTopicGroup = async (group: Omit<GlobalTopicGroup, 'id'>) => {
+    const created = await api.createGlobalTopicGroup({ ...group, createdBy: user?.id || '' });
+    setGlobalTopicGroups(prev => [...prev, created]);
   };
-  const updateGlobalTopicGroup = (id: string, updates: Partial<GlobalTopicGroup>) => {
-    setGlobalTopicGroups(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
+  const updateGlobalTopicGroup = async (id: string, updates: Partial<GlobalTopicGroup>) => {
+    const updated = await api.updateGlobalTopicGroup(id, updates);
+    setGlobalTopicGroups(prev => prev.map(g => g.id === id ? updated : g));
   };
-  const deleteGlobalTopicGroup = (id: string) => {
+  const deleteGlobalTopicGroup = async (id: string) => {
+    await api.deleteGlobalTopicGroup(id);
     setGlobalTopicGroups(prev => prev.filter(g => g.id !== id));
   };
 

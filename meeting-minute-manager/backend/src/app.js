@@ -15,6 +15,8 @@ app.use('/api/minutes', require('./routes/minutes'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/attachments', require('./routes/attachments'));
 app.use('/api/tags', require('./routes/tags'));
+app.use('/api/templates', require('./routes/templates'));
+app.use('/api/globalTopicGroups', require('./routes/globalTopicGroups'));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
