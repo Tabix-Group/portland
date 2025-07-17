@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import * as api from '../lib/api';
 import { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup } from '@/types';
 
 interface DataContextType {
@@ -46,141 +47,15 @@ const PREDEFINED_COLORS = [
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Juan Pérez',
-      email: 'juan.perez@example.com',
-      role: 'admin',
-      isActive: true,
-      projectIds: ['1', '2'],
-      hasLimitedAccess: false
-    },
-    {
-      id: '2',
-      name: 'Ana Gómez',
-      email: 'ana.gomez@example.com',
-      role: 'user',
-      isActive: true,
-      projectIds: ['1'],
-      hasLimitedAccess: true
-    },
-    {
-      id: '3',
-      name: 'Luis García',
-      email: 'luis.garcia@example.com',
-      role: 'user',
-      isActive: false,
-      projectIds: ['2', '3'],
-      hasLimitedAccess: true
-    }
-  ]);
-  const [projects, setProjects] = useState<Project[]>([
-    { 
-      id: '1', 
-      name: 'Sistema CRM', 
-      description: 'Implementación del nuevo sistema CRM',
-      userIds: ['1', '2'], 
-      color: '#3b82f6' // Blue
-    },
-    { 
-      id: '2', 
-      name: 'Migración Base de Datos', 
-      description: 'Migración a PostgreSQL',
-      userIds: ['1', '3'], 
-      color: '#ef4444' // Red
-    },
-    { 
-      id: '3', 
-      name: 'App Móvil', 
-      description: 'Desarrollo de aplicación móvil',
-      userIds: ['2', '3'], 
-      color: '#22c55e' // Green
-    }
-  ]);
-  const [minutes, setMinutes] = useState<Minute[]>([
-    {
-      id: '1',
-      number: 1,
-      title: 'Reunión de Kick-off del Proyecto CRM',
-      meetingDate: '2024-01-15',
-      meetingTime: '10:00',
-      nextMeetingDate: '2024-01-22',
-      nextMeetingTime: '10:00',
-      nextMeetingNotes: 'Revisar avances del sprint y planificar siguiente iteración',
-      participantIds: ['1', '2'],
-      participants: [users[0], users[1]],
-      occasionalParticipants: [],
-      informedPersons: [
-        {
-          id: 'ip1',
-          name: 'Carlos Mendoza',
-          email: 'carlos.mendoza@company.com',
-          reason: 'Stakeholder del proyecto'
-        }
-      ],
-      topicGroups: [
-        {
-          id: 'tg1',
-          name: 'DESARROLLO',
-          color: '#3b82f6',
-          description: 'Temas de desarrollo',
-          topicsDiscussed: [
-            { id: 'td1', text: 'Definición de arquitectura del sistema', mentions: ['1'], projectIds: ['1'] }
-          ],
-          decisions: [
-            { id: 'd1', text: 'Usar React con TypeScript para el frontend', mentions: ['2'], projectIds: ['1'] }
-          ],
-          pendingTasks: [
-            { id: 'pt1', text: 'Crear mockups de interfaz', assignedTo: '2', dueDate: '2024-01-20', completed: false, mentions: ['2'], projectIds: ['1'] }
-          ]
-        }
-      ],
-      topicsDiscussed: [
-        { id: 'topic1', text: 'Presentación del equipo y objetivos del proyecto', projectIds: ['1'] }
-      ],
-      decisions: [
-        { id: 'decision1', text: 'Metodología ágil con sprints de 2 semanas', projectIds: ['1'] }
-      ],
-      pendingTasks: [
-        { id: 'task1', text: 'Configurar entorno de desarrollo', assignedTo: '1', completed: false, projectIds: ['1'] }
-      ],
-      files: [],
-      status: 'published',
-      
-      createdBy: '1',
-      createdAt: '2024-01-15T08:00:00Z',
-      
-      projectIds: ['1']
-    },
-    {
-      id: '2',
-      number: 2,
-      title: 'Revisión de Avances - Semana 2',
-      meetingDate: '2024-01-22',
-      meetingTime: '14:30',
-      participantIds: ['1', '2', '3'],
-      participants: [users[0], users[1], users[2]],
-      occasionalParticipants: [],
-      informedPersons: [],
-      topicGroups: [],
-      topicsDiscussed: [
-        { id: 'topic2', text: 'Revisión del progreso del desarrollo', mentions: ['1', '2'], projectIds: ['1'] }
-      ],
-      decisions: [
-        { id: 'decision2', text: 'Implementar autenticación con JWT', mentions: ['1'], projectIds: ['1'] }
-      ],
-      pendingTasks: [
-        { id: 'task2', text: 'Completar módulo de usuarios', assignedTo: '2', dueDate: '2024-01-30', completed: false, mentions: ['2'], projectIds: ['1'] }
-      ],
-      files: [],
-      status: 'published',
-      
-      createdBy: '1',
-      createdAt: '2024-01-22T12:00:00Z',
-      projectIds: ['1']
-    }
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [minutes, setMinutes] = useState<Minute[]>([]);
+
+  useEffect(() => {
+    api.getUsers().then(setUsers);
+    api.getProjects().then(setProjects);
+    api.getMinutes().then(setMinutes);
+  }, []);
   const [templates, setTemplates] = useState<MinuteTemplate[]>([
     {
       id: '1',
@@ -280,91 +155,79 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  const addMinute = (minute: Omit<Minute, 'id'>) => {
-    const newMinute: Minute = {
-      ...minute,
-      id: Date.now().toString(),
-      status: 'draft',
-      
-      createdBy: user?.id || '',
-      createdAt: new Date().toISOString(),
-      participants: users.filter(u => minute.participantIds.includes(u.id))
-    };
-    setMinutes([...minutes, newMinute]);
+  // MINUTES CRUD
+  const addMinute = async (minute: Omit<Minute, 'id'>) => {
+    const created = await api.createMinute({ ...minute, createdBy: user?.id || '' });
+    setMinutes(prev => [...prev, created]);
+  };
+  const updateMinute = async (id: string, updates: Partial<Minute>) => {
+    const updated = await api.updateMinute(id, updates);
+    setMinutes(prev => prev.map(m => m.id === id ? updated : m));
+  };
+  const deleteMinute = async (id: string) => {
+    await api.deleteMinute(id);
+    setMinutes(prev => prev.filter(m => m.id !== id));
   };
 
-  const updateMinute = (id: string, updates: Partial<Minute>) => {
-    setMinutes(minutes.map(minute => minute.id === id ? { ...minute, ...updates } : minute));
+  // PROJECTS CRUD
+  const addProject = async (project: Omit<Project, 'id'>) => {
+    const created = await api.createProject(project);
+    setProjects(prev => [...prev, created]);
+  };
+  const updateProject = async (id: string, updates: Partial<Project>) => {
+    const updated = await api.updateProject(id, updates);
+    setProjects(prev => prev.map(p => p.id === id ? updated : p));
+  };
+  const deleteProject = async (id: string) => {
+    await api.deleteProject(id);
+    setProjects(prev => prev.filter(p => p.id !== id));
   };
 
-  const deleteMinute = (id: string) => {
-    setMinutes(minutes.filter(minute => minute.id !== id));
+  // USERS CRUD
+  const addUser = async (user: Omit<User, 'id'>) => {
+    const created = await api.createUser(user);
+    setUsers(prev => [...prev, created]);
+  };
+  const updateUser = async (id: string, updates: Partial<User>) => {
+    const updated = await api.updateUser(id, updates);
+    setUsers(prev => prev.map(u => u.id === id ? updated : u));
+  };
+  const deleteUser = async (id: string) => {
+    await api.deleteUser(id);
+    setUsers(prev => prev.filter(u => u.id !== id));
   };
 
-  const addProject = (project: Omit<Project, 'id'>) => {
-    const newProject: Project = {
-      ...project,
-      id: Date.now().toString()
-    };
-    setProjects([...projects, newProject]);
-  };
 
-  const updateProject = (id: string, updates: Partial<Project>) => {
-    setProjects(projects.map(project => project.id === id ? { ...project, ...updates } : project));
-  };
-
-  const deleteProject = (id: string) => {
-    setProjects(projects.filter(project => project.id !== id));
-  };
-
-  const addUser = (user: Omit<User, 'id'>) => {
-    const newUser: User = {
-      ...user,
-      id: Date.now().toString()
-    };
-    setUsers([...users, newUser]);
-  };
-
-  const updateUser = (id: string, updates: Partial<User>) => {
-    setUsers(users.map(user => user.id === id ? { ...user, ...updates } : user));
-  };
-
-  const deleteUser = (id: string) => {
-    setUsers(users.filter(user => user.id !== id));
-  };
-
+  // TEMPLATES CRUD
   const addTemplate = (template: Omit<MinuteTemplate, 'id'>) => {
     const newTemplate: MinuteTemplate = {
       ...template,
       id: Date.now().toString()
     };
-    setTemplates([...templates, newTemplate]);
+    setTemplates(prev => [...prev, newTemplate]);
   };
-
   const updateTemplate = (id: string, updates: Partial<MinuteTemplate>) => {
-    setTemplates(templates.map(template => template.id === id ? { ...template, ...updates } : template));
+    setTemplates(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
   };
-
   const deleteTemplate = (id: string) => {
-    setTemplates(templates.filter(template => template.id !== id));
+    setTemplates(prev => prev.filter(t => t.id !== id));
   };
 
-  const addTag = (tag: Omit<Tag, 'id'>) => {
-    const newTag: Tag = {
-      ...tag,
-      id: Date.now().toString()
-    };
-    setTags([...tags, newTag]);
+  // TAGS CRUD
+  const addTag = async (tag: Omit<Tag, 'id'>) => {
+    const created = await api.createTag(tag);
+    setTags(prev => [...prev, created]);
+  };
+  const updateTag = async (id: string, updates: Partial<Tag>) => {
+    const updated = await api.updateTag(id, updates);
+    setTags(prev => prev.map(t => t.id === id ? updated : t));
+  };
+  const deleteTag = async (id: string) => {
+    await api.deleteTag(id);
+    setTags(prev => prev.filter(t => t.id !== id));
   };
 
-  const updateTag = (id: string, updates: Partial<Tag>) => {
-    setTags(tags.map(tag => tag.id === id ? { ...tag, ...updates } : tag));
-  };
-
-  const deleteTag = (id: string) => {
-    setTags(tags.filter(tag => tag.id !== id));
-  };
-
+  // GLOBAL TOPIC GROUPS CRUD
   const addGlobalTopicGroup = (group: Omit<GlobalTopicGroup, 'id'>) => {
     const newGroup: GlobalTopicGroup = {
       ...group,
@@ -372,17 +235,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdBy: user?.id || '',
       createdAt: new Date().toISOString()
     };
-    setGlobalTopicGroups([...globalTopicGroups, newGroup]);
+    setGlobalTopicGroups(prev => [...prev, newGroup]);
   };
-
   const updateGlobalTopicGroup = (id: string, updates: Partial<GlobalTopicGroup>) => {
-    setGlobalTopicGroups(groups => groups.map(group => 
-      group.id === id ? { ...group, ...updates } : group
-    ));
+    setGlobalTopicGroups(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
   };
-
   const deleteGlobalTopicGroup = (id: string) => {
-    setGlobalTopicGroups(groups => groups.filter(group => group.id !== id));
+    setGlobalTopicGroups(prev => prev.filter(g => g.id !== id));
   };
 
 
