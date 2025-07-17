@@ -1,156 +1,176 @@
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { useAuth } from '@/contexts/AuthContext';
-import { useData } from '@/contexts/DataContext';
-import { Plus, Search, Calendar, Users, CheckCircle, Clock, AlertCircle, Check, ChevronDown, X, Tag, FolderOpen } from 'lucide-react';
+"use client"
+
+import type React from "react"
+import { useState, useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { useAuth } from "@/contexts/AuthContext"
+import { useData } from "@/contexts/DataContext"
+import {
+  Plus,
+  Search,
+  Calendar,
+  Users,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Check,
+  ChevronDown,
+  X,
+  Tag,
+  FolderOpen,
+} from "lucide-react"
 
 interface MinutesPageProps {
-  onCreateMinute: () => void;
-  onViewMinute: (id: string) => void;
+  onCreateMinute: () => void
+  onViewMinute: (id: string) => void
 }
 
 const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute }) => {
-  const { user } = useAuth();
-  const { minutes, projects, users } = useData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterProject, setFilterProject] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterTags, setFilterTags] = useState<string[]>([]);
-  const [filterTopicGroups, setFilterTopicGroups] = useState<string[]>([]);
-  const [tagSelectorOpen, setTagSelectorOpen] = useState(false);
-  const [topicGroupSelectorOpen, setTopicGroupSelectorOpen] = useState(false);
+  const { user } = useAuth()
+  const { minutes, projects, users } = useData()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterProject, setFilterProject] = useState<string>("all")
+  const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [filterTags, setFilterTags] = useState<string[]>([])
+  const [filterTopicGroups, setFilterTopicGroups] = useState<string[]>([])
+  const [tagSelectorOpen, setTagSelectorOpen] = useState(false)
+  const [topicGroupSelectorOpen, setTopicGroupSelectorOpen] = useState(false)
+
+  // Helper function to safely get array
+  const safeArray = (arr: any): any[] => (Array.isArray(arr) ? arr : [])
 
   // Get all unique tags from all minutes
   const allTags = useMemo(() => {
-    const tagMap = new Map();
-    minutes.forEach(minute => {
-      (Array.isArray(minute.tags) ? minute.tags : []).forEach(tag => {
-        if (tag && tag.id) tagMap.set(tag.id, tag);
-      });
-    });
-    return Array.from(tagMap.values());
-  }, [minutes]);
+    const tagMap = new Map()
+    safeArray(minutes).forEach((minute) => {
+      safeArray(minute.tags).forEach((tag) => {
+        if (tag && tag.id) tagMap.set(tag.id, tag)
+      })
+    })
+    return Array.from(tagMap.values())
+  }, [minutes])
 
   // Get all unique topic groups from all minutes
   const allTopicGroups = useMemo(() => {
-    const topicGroupMap = new Map();
-    minutes.forEach(minute => {
-      (Array.isArray(minute.topicGroups) ? minute.topicGroups : []).forEach(group => {
-        if (group && group.id) topicGroupMap.set(group.id, group);
-      });
-    });
-    return Array.from(topicGroupMap.values());
-  }, [minutes]);
+    const topicGroupMap = new Map()
+    safeArray(minutes).forEach((minute) => {
+      safeArray(minute.topicGroups).forEach((group) => {
+        if (group && group.id) topicGroupMap.set(group.id, group)
+      })
+    })
+    return Array.from(topicGroupMap.values())
+  }, [minutes])
 
   // Filter projects based on user access
   const userProjects = useMemo(() => {
-    if (user?.role === 'admin' || !user?.hasLimitedAccess) {
-      return projects;
+    if (user?.role === "admin" || !user?.hasLimitedAccess) {
+      return safeArray(projects)
     }
-    return projects.filter(project => Array.isArray(user.projectIds) && user.projectIds.includes(project.id));
-  }, [projects, user]);
+    return safeArray(projects).filter((project) => safeArray(user.projectIds).includes(project.id))
+  }, [projects, user])
 
   // Filter minutes based on user permissions and project access, sorted by date (newest first)
   const userMinutes = useMemo(() => {
-    return minutes
-      .filter(minute => {
+    return safeArray(minutes)
+      .filter((minute) => {
         // Admin can see all minutes
-        if (user?.role === 'admin') return true;
-        
+        if (user?.role === "admin") return true
+
         // Users with limited access can only see minutes from their assigned projects
-        if (user?.hasLimitedAccess && Array.isArray(minute.projectIds) && minute.projectIds.length > 0) {
-          return minute.projectIds.some(projectId => Array.isArray(user.projectIds) && user.projectIds.includes(projectId));
+        if (user?.hasLimitedAccess && safeArray(minute.projectIds).length > 0) {
+          return safeArray(minute.projectIds).some((projectId) => safeArray(user.projectIds).includes(projectId))
         }
-        
+
         // Regular users can see minutes they participate in
-        return minute.participantIds.includes(user?.id || '');
+        return safeArray(minute.participantIds).includes(user?.id || "")
       })
-      .sort((a, b) => new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime());
-  }, [minutes, user]);
+      .sort((a, b) => new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime())
+  }, [minutes, user])
 
   // Filter and search minutes
   const filteredMinutes = useMemo(() => {
-    return userMinutes.filter(minute => {
-      const matchesSearch = minute.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesProject = filterProject === 'all' || (minute.projectIds && minute.projectIds.includes(filterProject));
-      const matchesStatus = filterStatus === 'all' || minute.status === filterStatus;
-      // Parse tags
-      let tags = [];
-      if (Array.isArray(minute.tags)) {
-        tags = minute.tags;
-      } else if (typeof minute.tags === 'string') {
-        try { tags = JSON.parse(minute.tags); } catch { tags = []; }
-      } else if (typeof minute.tags === 'object' && minute.tags !== null) {
-        tags = Object.values(minute.tags);
-      }
-      // Parse topicGroups
-      let topicGroups = [];
-      if (Array.isArray(minute.topicGroups)) {
-        topicGroups = minute.topicGroups;
-      } else if (typeof minute.topicGroups === 'string') {
-        try { topicGroups = JSON.parse(minute.topicGroups); } catch { topicGroups = []; }
-      } else if (typeof minute.topicGroups === 'object' && minute.topicGroups !== null) {
-        topicGroups = Object.values(minute.topicGroups);
-      }
-      const matchesTags = filterTags.length === 0 || filterTags.some(tagId => Array.isArray(tags) && tags.some(tag => tag.id === tagId));
-      const matchesTopicGroups = filterTopicGroups.length === 0 || filterTopicGroups.some(groupId => Array.isArray(topicGroups) && topicGroups.some(group => group.id === groupId));
-      return matchesSearch && matchesProject && matchesStatus && matchesTags && matchesTopicGroups;
-    });
-  }, [userMinutes, searchTerm, filterProject, filterStatus, filterTags, filterTopicGroups]);
+    return safeArray(userMinutes).filter((minute) => {
+      const matchesSearch = minute.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false
+      const matchesProject = filterProject === "all" || safeArray(minute.projectIds).includes(filterProject)
+      const matchesStatus = filterStatus === "all" || minute.status === filterStatus
+
+      // Parse tags safely
+      const tags = safeArray(minute.tags)
+
+      // Parse topicGroups safely
+      const topicGroups = safeArray(minute.topicGroups)
+
+      const matchesTags = filterTags.length === 0 || filterTags.some((tagId) => tags.some((tag) => tag?.id === tagId))
+      const matchesTopicGroups =
+        filterTopicGroups.length === 0 ||
+        filterTopicGroups.some((groupId) => topicGroups.some((group) => group?.id === groupId))
+
+      return matchesSearch && matchesProject && matchesStatus && matchesTags && matchesTopicGroups
+    })
+  }, [userMinutes, searchTerm, filterProject, filterStatus, filterTags, filterTopicGroups])
 
   const handleTagToggle = (tagId: string) => {
     if (filterTags.includes(tagId)) {
-      setFilterTags(filterTags.filter(id => id !== tagId));
+      setFilterTags(filterTags.filter((id) => id !== tagId))
     } else {
-      setFilterTags([...filterTags, tagId]);
+      setFilterTags([...filterTags, tagId])
     }
-  };
+  }
 
   const handleTopicGroupToggle = (groupId: string) => {
     if (filterTopicGroups.includes(groupId)) {
-      setFilterTopicGroups(filterTopicGroups.filter(id => id !== groupId));
+      setFilterTopicGroups(filterTopicGroups.filter((id) => id !== groupId))
     } else {
-      setFilterTopicGroups([...filterTopicGroups, groupId]);
+      setFilterTopicGroups([...filterTopicGroups, groupId])
     }
-  };
+  }
 
   const removeTag = (tagId: string) => {
-    setFilterTags(filterTags.filter(id => id !== tagId));
-  };
+    setFilterTags(filterTags.filter((id) => id !== tagId))
+  }
 
   const removeTopicGroup = (groupId: string) => {
-    setFilterTopicGroups(filterTopicGroups.filter(id => id !== groupId));
-  };
+    setFilterTopicGroups(filterTopicGroups.filter((id) => id !== groupId))
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "published":
+        return "bg-green-100 text-green-800"
+      case "draft":
+        return "bg-yellow-100 text-yellow-800"
+      default:
+        return "bg-gray-100 text-gray-800"
     }
-  };
+  }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'published': return 'Publicada';
-      case 'draft': return 'Borrador';
-      default: return status;
+      case "published":
+        return "Publicada"
+      case "draft":
+        return "Borrador"
+      default:
+        return status
     }
-  };
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'published': return CheckCircle;
-      case 'draft': return Clock;
-      default: return AlertCircle;
+      case "published":
+        return CheckCircle
+      case "draft":
+        return Clock
+      default:
+        return AlertCircle
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -184,7 +204,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                 className="pl-10"
               />
             </div>
-            
+
             <Select value={filterProject} onValueChange={setFilterProject}>
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por proyecto" />
@@ -194,10 +214,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                 {userProjects.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
                     <div className="flex items-center space-x-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: project.color || '#6b7280' }}
-                      />
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color || "#6b7280" }} />
                       <span>{project.name}</span>
                     </div>
                   </SelectItem>
@@ -222,15 +239,14 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                   variant="outline"
                   role="combobox"
                   aria-expanded={tagSelectorOpen}
-                  className="justify-between"
+                  className="justify-between bg-transparent"
                 >
                   <div className="flex items-center space-x-2">
                     <Tag className="h-4 w-4 text-gray-400" />
                     <span className="text-gray-500">
-                      {filterTags.length === 0 
-                        ? "Etiquetas..." 
-                        : `${filterTags.length} etiqueta${filterTags.length > 1 ? 's' : ''}`
-                      }
+                      {filterTags.length === 0
+                        ? "Etiquetas..."
+                        : `${filterTags.length} etiqueta${filterTags.length > 1 ? "s" : ""}`}
                     </span>
                   </div>
                   <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -243,21 +259,12 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                     <CommandEmpty>No se encontraron etiquetas.</CommandEmpty>
                     <CommandGroup>
                       {allTags.map((tag) => (
-                        <CommandItem
-                          key={tag.id}
-                          value={tag.name}
-                          onSelect={() => handleTagToggle(tag.id)}
-                        >
+                        <CommandItem key={tag.id} value={tag.name} onSelect={() => handleTagToggle(tag.id)}>
                           <Check
-                            className={`mr-2 h-4 w-4 ${
-                              filterTags.includes(tag.id) ? "opacity-100" : "opacity-0"
-                            }`}
+                            className={`mr-2 h-4 w-4 ${filterTags.includes(tag.id) ? "opacity-100" : "opacity-0"}`}
                           />
                           <div className="flex items-center space-x-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: tag.color }}
-                            />
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
                             <span>{tag.name}</span>
                           </div>
                         </CommandItem>
@@ -274,15 +281,14 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                   variant="outline"
                   role="combobox"
                   aria-expanded={topicGroupSelectorOpen}
-                  className="justify-between"
+                  className="justify-between bg-transparent"
                 >
                   <div className="flex items-center space-x-2">
                     <FolderOpen className="h-4 w-4 text-gray-400" />
                     <span className="text-gray-500">
-                      {filterTopicGroups.length === 0 
-                        ? "Agrupadores..." 
-                        : `${filterTopicGroups.length} grupo${filterTopicGroups.length > 1 ? 's' : ''}`
-                      }
+                      {filterTopicGroups.length === 0
+                        ? "Agrupadores..."
+                        : `${filterTopicGroups.length} grupo${filterTopicGroups.length > 1 ? "s" : ""}`}
                     </span>
                   </div>
                   <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -306,10 +312,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                             }`}
                           />
                           <div className="flex items-center space-x-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: group.color }}
-                            />
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: group.color }} />
                             <span>{group.name}</span>
                           </div>
                         </CommandItem>
@@ -320,14 +323,14 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
               </PopoverContent>
             </Popover>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
-                setSearchTerm('');
-                setFilterProject('all');
-                setFilterStatus('all');
-                setFilterTags([]);
-                setFilterTopicGroups([]);
+                setSearchTerm("")
+                setFilterProject("all")
+                setFilterStatus("all")
+                setFilterTags([])
+                setFilterTopicGroups([])
               }}
             >
               Limpiar filtros
@@ -341,8 +344,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                 <div>
                   <div className="text-sm text-gray-600 mb-2">Etiquetas seleccionadas:</div>
                   <div className="flex flex-wrap gap-2">
-                    {filterTags.map(tagId => {
-                      const tag = allTags.find(t => t.id === tagId);
+                    {filterTags.map((tagId) => {
+                      const tag = allTags.find((t) => t.id === tagId)
                       return tag ? (
                         <Badge
                           key={tag.id}
@@ -359,7 +362,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                             <X className="h-3 w-3" />
                           </Button>
                         </Badge>
-                      ) : null;
+                      ) : null
                     })}
                   </div>
                 </div>
@@ -368,8 +371,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                 <div>
                   <div className="text-sm text-gray-600 mb-2">Agrupadores seleccionados:</div>
                   <div className="flex flex-wrap gap-2">
-                    {filterTopicGroups.map(groupId => {
-                      const group = allTopicGroups.find(g => g.id === groupId);
+                    {filterTopicGroups.map((groupId) => {
+                      const group = allTopicGroups.find((g) => g.id === groupId)
                       return group ? (
                         <Badge
                           key={group.id}
@@ -386,7 +389,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                             <X className="h-3 w-3" />
                           </Button>
                         </Badge>
-                      ) : null;
+                      ) : null
                     })}
                   </div>
                 </div>
@@ -409,8 +412,14 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
           ) : (
             <div className="space-y-4">
               {filteredMinutes.map((minute) => {
-                const StatusIcon = getStatusIcon(minute.status);
-                const relatedProjects = minute.projectIds ? userProjects.filter(p => minute.projectIds!.includes(p.id)) : [];
+                const StatusIcon = getStatusIcon(minute.status)
+                const relatedProjects = safeArray(minute.projectIds)
+                  .map((id) => userProjects.find((p) => p.id === id))
+                  .filter(Boolean)
+
+                const participantCount =
+                  safeArray(minute.participants).length + safeArray(minute.occasionalParticipants).length
+
                 return (
                   <div
                     key={minute.id}
@@ -425,17 +434,17 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {getStatusLabel(minute.status)}
                           </Badge>
-                          {relatedProjects.map(project => (
-                            <Badge 
-                              key={project.id} 
+                          {relatedProjects.map((project) => (
+                            <Badge
+                              key={project.id}
                               className="text-white"
-                              style={{ backgroundColor: project.color || '#6b7280' }}
+                              style={{ backgroundColor: project.color || "#6b7280" }}
                             >
                               {project.name}
                             </Badge>
                           ))}
                         </div>
-                        
+
                         <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-4 w-4" />
@@ -443,14 +452,14 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                           </div>
                           <div className="flex items-center space-x-1">
                             <Users className="h-4 w-4" />
-                        <span>{(Array.isArray(minute.participants) ? minute.participants.length : 0)} participantes</span>
+                            <span>{participantCount} participantes</span>
                           </div>
                         </div>
-                        
+
                         {/* Topic Groups Display */}
-                        {Array.isArray(minute.topicGroups) && minute.topicGroups.length > 0 && (
+                        {safeArray(minute.topicGroups).length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
-                            {minute.topicGroups.map(group => (
+                            {safeArray(minute.topicGroups).map((group) => (
                               <Badge
                                 key={group.id}
                                 className="text-xs text-white"
@@ -462,33 +471,28 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                             ))}
                           </div>
                         )}
-                        
+
                         {/* Tags Display */}
-                        {Array.isArray(minute.tags) && minute.tags.length > 0 && (
+                        {safeArray(minute.tags).length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
-                            {minute.tags.map(tag => (
-                              <Badge
-                                key={tag.id}
-                                className="text-xs text-white"
-                                style={{ backgroundColor: tag.color }}
-                              >
+                            {safeArray(minute.tags).map((tag) => (
+                              <Badge key={tag.id} className="text-xs text-white" style={{ backgroundColor: tag.color }}>
                                 {tag.name}
                               </Badge>
                             ))}
                           </div>
                         )}
-                        
                       </div>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           )}
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default MinutesPage;
+export default MinutesPage
