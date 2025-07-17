@@ -150,8 +150,8 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
               <div className="space-y-2">
                 <Label className="text-sm text-gray-600">Usuarios internos seleccionados ({selectedUserIds.length}):</Label>
                 <div className="flex flex-wrap gap-2">
-                  {selectedUserIds.map(userId => {
-                    const user = users.find(u => u.id === userId);
+                  {(Array.isArray(selectedUserIds) ? selectedUserIds : []).map(userId => {
+                    const user = Array.isArray(users) ? users.find(u => u.id === userId) : null;
                     return user ? (
                       <Badge key={userId} variant="default" className="bg-blue-100 text-blue-800">
                         {user.name}
@@ -219,9 +219,9 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
               </Card>
             )}
 
-            {occasionalParticipants.length > 0 && (
+            {Array.isArray(occasionalParticipants) && occasionalParticipants.length > 0 && (
               <div className="space-y-2">
-                {occasionalParticipants.map((participant) => (
+                {(Array.isArray(occasionalParticipants) ? occasionalParticipants : []).map((participant) => (
                   <div key={participant.id} className="flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-200">
                     <div className="flex-1">
                       <div className="font-medium text-sm">{participant.name}</div>
@@ -339,13 +339,13 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
             </Card>
           )}
 
-          {informedPersons.length > 0 && (
+          {Array.isArray(informedPersons) && informedPersons.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm text-gray-600">
                 Personas a informar ({informedPersons.length}):
               </Label>
               <div className="space-y-2">
-                {informedPersons.map((person) => (
+                {(Array.isArray(informedPersons) ? informedPersons : []).map((person) => (
                   <div key={person.id} className="flex items-center justify-between bg-orange-50 p-3 rounded-lg border border-orange-200">
                     <div className="flex-1">
                       <div className="font-medium text-sm flex items-center">
@@ -386,15 +386,15 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
           <strong>Resumen:</strong>
         </div>
         <div className="text-xs text-gray-500 mt-1">
-          • {selectedUserIds.length} participantes internos
+          • {Array.isArray(selectedUserIds) ? selectedUserIds.length : 0} participantes internos
         </div>
         <div className="text-xs text-gray-500">
-          • {occasionalParticipants.length} participantes externos
+          • {Array.isArray(occasionalParticipants) ? occasionalParticipants.length : 0} participantes externos
         </div>
         <div className="text-xs text-gray-500">
-          • {informedPersons.length} personas a informar
+          • {Array.isArray(informedPersons) ? informedPersons.length : 0} personas a informar
         </div>
-        {selectedUserIds.length + occasionalParticipants.length === 0 && (
+        {(Array.isArray(selectedUserIds) ? selectedUserIds.length : 0) + (Array.isArray(occasionalParticipants) ? occasionalParticipants.length : 0) === 0 && (
           <div className="text-red-600 text-xs mt-1">* Debe seleccionar al menos un participante</div>
         )}
       </div>
