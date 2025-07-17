@@ -61,14 +61,50 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       topicGroups: Array.isArray(minute.topicGroups)
         ? minute.topicGroups.map(g => ({
             ...g,
-            topicsDiscussed: Array.isArray(g.topicsDiscussed) ? g.topicsDiscussed : [],
-            decisions: Array.isArray(g.decisions) ? g.decisions : [],
-            pendingTasks: Array.isArray(g.pendingTasks) ? g.pendingTasks : []
+            topicsDiscussed: Array.isArray(g.topicsDiscussed)
+              ? g.topicsDiscussed.map(t => ({
+                  ...t,
+                  mentions: Array.isArray(t.mentions) ? t.mentions : [],
+                  projectIds: Array.isArray(t.projectIds) ? t.projectIds : []
+                }))
+              : [],
+            decisions: Array.isArray(g.decisions)
+              ? g.decisions.map(d => ({
+                  ...d,
+                  mentions: Array.isArray(d.mentions) ? d.mentions : [],
+                  projectIds: Array.isArray(d.projectIds) ? d.projectIds : []
+                }))
+              : [],
+            pendingTasks: Array.isArray(g.pendingTasks)
+              ? g.pendingTasks.map(t => ({
+                  ...t,
+                  mentions: Array.isArray(t.mentions) ? t.mentions : [],
+                  projectIds: Array.isArray(t.projectIds) ? t.projectIds : []
+                }))
+              : [],
           }))
         : [],
-      topicsDiscussed: Array.isArray(minute.topicsDiscussed) ? minute.topicsDiscussed : [],
-      decisions: Array.isArray(minute.decisions) ? minute.decisions : [],
-      pendingTasks: Array.isArray(minute.pendingTasks) ? minute.pendingTasks : [],
+      topicsDiscussed: Array.isArray(minute.topicsDiscussed)
+        ? minute.topicsDiscussed.map(t => ({
+            ...t,
+            mentions: Array.isArray(t.mentions) ? t.mentions : [],
+            projectIds: Array.isArray(t.projectIds) ? t.projectIds : []
+          }))
+        : [],
+      decisions: Array.isArray(minute.decisions)
+        ? minute.decisions.map(d => ({
+            ...d,
+            mentions: Array.isArray(d.mentions) ? d.mentions : [],
+            projectIds: Array.isArray(d.projectIds) ? d.projectIds : []
+          }))
+        : [],
+      pendingTasks: Array.isArray(minute.pendingTasks)
+        ? minute.pendingTasks.map(t => ({
+            ...t,
+            mentions: Array.isArray(t.mentions) ? t.mentions : [],
+            projectIds: Array.isArray(t.projectIds) ? t.projectIds : []
+          }))
+        : [],
       participants: Array.isArray(minute.participants) ? minute.participants : [],
       occasionalParticipants: Array.isArray(minute.occasionalParticipants) ? minute.occasionalParticipants : [],
       informedPersons: Array.isArray(minute.informedPersons) ? minute.informedPersons : [],
