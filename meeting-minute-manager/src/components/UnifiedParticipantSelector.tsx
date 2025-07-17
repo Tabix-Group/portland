@@ -127,10 +127,10 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
             />
 
             <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
-              {filteredUsers.length === 0 ? (
+              {(Array.isArray(filteredUsers) ? filteredUsers : []).length === 0 ? (
                 <p className="text-sm text-gray-500 text-center py-2">No se encontraron usuarios</p>
               ) : (
-                filteredUsers.map((user) => (
+                (Array.isArray(filteredUsers) ? filteredUsers : []).map((user) => (
                   <div key={user.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded">
                     <Checkbox
                       id={`user-${user.id}`}
@@ -148,7 +148,7 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
 
             {Array.isArray(selectedUserIds) && selectedUserIds.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-sm text-gray-600">Usuarios internos seleccionados ({selectedUserIds.length}):</Label>
+                <Label className="text-sm text-gray-600">Usuarios internos seleccionados ({Array.isArray(selectedUserIds) ? selectedUserIds.length : 0}):</Label>
                 <div className="flex flex-wrap gap-2">
                   {(Array.isArray(selectedUserIds) ? selectedUserIds : []).map(userId => {
                     const user = Array.isArray(users) ? users.find(u => u.id === userId) : null;
@@ -267,11 +267,11 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
           </p>
 
           {/* Seleccionar usuarios internos */}
-          {availableInternalUsers.length > 0 && (
+          {(Array.isArray(availableInternalUsers) ? availableInternalUsers : []).length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">Usuarios Internos Disponibles:</Label>
               <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-3 bg-gray-50">
-                {availableInternalUsers.map((user) => (
+                {(Array.isArray(availableInternalUsers) ? availableInternalUsers : []).map((user) => (
                   <div key={user.id} className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="font-medium text-sm">{user.name}</div>
@@ -342,7 +342,7 @@ const UnifiedParticipantSelector: React.FC<UnifiedParticipantSelectorProps> = ({
           {Array.isArray(informedPersons) && informedPersons.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm text-gray-600">
-                Personas a informar ({informedPersons.length}):
+                Personas a informar ({Array.isArray(informedPersons) ? informedPersons.length : 0}):
               </Label>
               <div className="space-y-2">
                 {(Array.isArray(informedPersons) ? informedPersons : []).map((person) => (
