@@ -37,6 +37,13 @@ const Settings: React.FC = () => {
     addTag, updateTag, deleteTag,
     addGlobalTopicGroup, updateGlobalTopicGroup, deleteGlobalTopicGroup
   } = useData();
+
+  // Defensive: always use safe arrays for all lists
+  const safeUsers = Array.isArray(users) ? users : [];
+  const safeProjects = Array.isArray(projects) ? projects : [];
+  const safeTemplates = Array.isArray(templates) ? templates : [];
+  const safeTags = Array.isArray(tags) ? tags : [];
+  const safeGlobalTopicGroups = Array.isArray(globalTopicGroups) ? globalTopicGroups : [];
   
   const [activeTab, setActiveTab] = useState('users');
   const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -196,7 +203,7 @@ const Settings: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {users.map((user) => (
+                {safeUsers.map((user) => (
                   <div key={user.id}>
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
@@ -332,7 +339,7 @@ const Settings: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {projects.map((project) => (
+                {safeProjects.map((project) => (
                   <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center">
                       <div
@@ -414,7 +421,7 @@ const Settings: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {globalTopicGroups.map((group) => (
+                {safeGlobalTopicGroups.map((group) => (
                   <div key={group.id}>
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center space-x-3">
@@ -556,7 +563,7 @@ const Settings: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {templates.map((template) => (
+                {safeTemplates.map((template) => (
                   <div key={template.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h3 className="text-lg font-semibold">{template.name}</h3>
@@ -627,7 +634,7 @@ const Settings: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {tags.map((tag) => (
+                {safeTags.map((tag) => (
                   <div key={tag.id}>
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center space-x-3">

@@ -81,13 +81,13 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onBack, onSelectTem
                   <p className="text-sm text-gray-600 mb-3">{template.description}</p>
                   <div className="space-y-2">
                     <div className="text-xs text-gray-500">
-                      <span className="font-medium">Temas:</span> {template.sections.topicsDiscussed.length}
+                      <span className="font-medium">Temas:</span> {Array.isArray(template.sections.topicsDiscussed) ? template.sections.topicsDiscussed.length : 0}
                     </div>
                     <div className="text-xs text-gray-500">
-                      <span className="font-medium">Decisiones:</span> {template.sections.decisions.length}
+                      <span className="font-medium">Decisiones:</span> {Array.isArray(template.sections.decisions) ? template.sections.decisions.length : 0}
                     </div>
                     <div className="text-xs text-gray-500">
-                      <span className="font-medium">Tareas:</span> {template.sections.pendingTasks.length}
+                      <span className="font-medium">Tareas:</span> {Array.isArray(template.sections.pendingTasks) ? template.sections.pendingTasks.length : 0}
                     </div>
                   </div>
                 </CardContent>
