@@ -64,7 +64,6 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.title || !formData.meetingDate || (formData.participantIds.length === 0 && formData.occasionalParticipants.length === 0)) {
       toast({
         title: "Error",
@@ -74,8 +73,8 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       return;
     }
 
-    const selectedParticipants = users.filter(u => formData.participantIds.includes(u.id));
-    // Construir el objeto minute con todos los campos relevantes
+    // Limpiar arrays y asegurar que los campos sean válidos
+    const cleanArray = (arr) => Array.isArray(arr) ? arr.filter(item => item && (item.text ? item.text.trim() !== '' : true)) : [];
     const minute = {
       number: nextMinuteNumber,
       title: formData.title,
@@ -85,20 +84,25 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       nextMeetingTime: formData.nextMeetingTime,
       nextMeetingNotes: formData.nextMeetingNotes,
       participantIds: formData.participantIds,
-      participants: selectedParticipants,
-      occasionalParticipants: formData.occasionalParticipants,
-      informedPersons: formData.informedPersons,
-      topicGroups: formData.topicGroups,
-      topicsDiscussed: formData.topicsDiscussed,
-      decisions: formData.decisions,
-      pendingTasks: formData.pendingTasks,
+      participants: users.filter(u => formData.participantIds.includes(u.id)),
+      occasionalParticipants: cleanArray(formData.occasionalParticipants),
+      informedPersons: cleanArray(formData.informedPersons),
+      topicGroups: Array.isArray(formData.topicGroups) ? formData.topicGroups.map(g => ({
+        ...g,
+        topicsDiscussed: cleanArray(g.topicsDiscussed),
+        decisions: cleanArray(g.decisions),
+        pendingTasks: cleanArray(g.pendingTasks)
+      })) : [],
+      topicsDiscussed: cleanArray(formData.topicsDiscussed),
+      decisions: cleanArray(formData.decisions),
+      pendingTasks: cleanArray(formData.pendingTasks),
       internalNotes: formData.internalNotes,
-      tags: formData.tags,
-      files: formData.files,
+      tags: Array.isArray(formData.tags) ? formData.tags : [],
+      files: Array.isArray(formData.files) ? formData.files : [],
       status: 'draft',
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
-      projectIds: formData.projectIds,
+      projectIds: Array.isArray(formData.projectIds) ? formData.projectIds : [],
     };
 
     addMinute(minute);

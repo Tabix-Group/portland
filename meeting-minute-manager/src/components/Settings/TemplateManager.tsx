@@ -55,9 +55,9 @@ const TemplateManager: React.FC = () => {
     isCustom: true
   });
 
-  const handleAddTemplate = () => {
+  const handleAddTemplate = async () => {
     if (!newTemplate.name || !newTemplate.description || !newTemplate.icon || !newTemplate.color) {
-      // Show error or return
+      alert('Completa todos los campos obligatorios');
       return;
     }
     // Limpiar secciones: eliminar strings vacíos
@@ -76,27 +76,29 @@ const TemplateManager: React.FC = () => {
     };
     if (Array.isArray(newTemplate.topicGroups) && newTemplate.topicGroups.length > 0) {
       payload.topicGroups = newTemplate.topicGroups.map(g => ({
-        id: g.id,
         name: g.name,
         color: g.color,
         description: g.description || ""
       }));
     }
-    addTemplate(payload);
-    setNewTemplate({
-      name: '',
-      description: '',
-      icon: 'Calendar',
-      color: 'bg-blue-100 text-blue-800',
-      sections: {
-        topicsDiscussed: [''],
-        decisions: [''],
-        pendingTasks: ['']
-      },
-      topicGroups: [],
-      isCustom: true
-    });
-  }
+    try {
+      await addTemplate(payload);
+      setNewTemplate({
+        name: '',
+        description: '',
+        icon: 'Calendar',
+        color: 'bg-blue-100 text-blue-800',
+        sections: {
+          topicsDiscussed: [''],
+          decisions: [''],
+          pendingTasks: ['']
+        },
+        topicGroups: [],
+        isCustom: true
+      });
+    } catch (err) {
+      alert('Error al crear la plantilla. Verifica los datos o contacta al administrador.');
+    }
   };
 
   const updateSection = (sectionType: keyof MinuteTemplate['sections'], index: number, value: string) => {
@@ -435,9 +437,9 @@ const TemplateManager: React.FC = () => {
                     <TableCell>
                       {template.topicGroups && template.topicGroups.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {template.topicGroups.map(group => (
+                          {template.topicGroups.map((group, idx) => (
                             <Badge
-                              key={group.id}
+                              key={group.id || idx}
                               className="text-xs text-white"
                               style={{ backgroundColor: group.color }}
                             >
