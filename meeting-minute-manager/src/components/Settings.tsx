@@ -539,6 +539,7 @@ const Settings: React.FC = () => {
                       decisions: [],
                       pendingTasks: [],
                     }),
+                    topicGroups: [],
                     isCustom: true,
                   });
                   setNewTemplateName('');
