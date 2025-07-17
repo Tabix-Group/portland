@@ -1,6 +1,6 @@
 // API client for all entities
 
-const BASE_URL = "https://portland-production.up.railway.app/"; // URL real del backend en Railway
+const BASE_URL = "https://portland-be-production.up.railway.app/api"; // URL real del backend en Railway
 
 async function request(path: string, options: RequestInit = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
