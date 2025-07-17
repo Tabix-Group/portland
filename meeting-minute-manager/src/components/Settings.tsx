@@ -67,7 +67,7 @@ const Settings: React.FC = () => {
         isActive: true,
         projectIds: [],
         hasLimitedAccess: false,
-                {(Array.isArray(users) ? users : []).map((user) => (
+      });
       setNewUserName('');
       setNewUserEmail('');
     }
