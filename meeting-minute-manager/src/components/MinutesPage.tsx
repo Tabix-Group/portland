@@ -30,7 +30,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const allTags = useMemo(() => {
     const tagMap = new Map();
     minutes.forEach(minute => {
-      minute.tags?.forEach(tag => {
+      (Array.isArray(minute.tags) ? minute.tags : []).forEach(tag => {
         tagMap.set(tag.id, tag);
       });
     });
@@ -41,7 +41,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const allTopicGroups = useMemo(() => {
     const topicGroupMap = new Map();
     minutes.forEach(minute => {
-      minute.topicGroups?.forEach(group => {
+      (Array.isArray(minute.topicGroups) ? minute.topicGroups : []).forEach(group => {
         topicGroupMap.set(group.id, group);
       });
     });
@@ -80,8 +80,10 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
       const matchesSearch = minute.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesProject = filterProject === 'all' || (minute.projectIds && minute.projectIds.includes(filterProject));
       const matchesStatus = filterStatus === 'all' || minute.status === filterStatus;
-      const matchesTags = filterTags.length === 0 || (minute.tags && filterTags.some(tagId => minute.tags!.some(tag => tag.id === tagId)));
-      const matchesTopicGroups = filterTopicGroups.length === 0 || (minute.topicGroups && filterTopicGroups.some(groupId => minute.topicGroups!.some(group => group.id === groupId)));
+      const tags = Array.isArray(minute.tags) ? minute.tags : [];
+      const topicGroups = Array.isArray(minute.topicGroups) ? minute.topicGroups : [];
+      const matchesTags = filterTags.length === 0 || filterTags.some(tagId => tags.some(tag => tag.id === tagId));
+      const matchesTopicGroups = filterTopicGroups.length === 0 || filterTopicGroups.some(groupId => topicGroups.some(group => group.id === groupId));
       
       return matchesSearch && matchesProject && matchesStatus && matchesTags && matchesTopicGroups;
     });
@@ -426,12 +428,12 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                           </div>
                           <div className="flex items-center space-x-1">
                             <Users className="h-4 w-4" />
-                            <span>{minute.participants.length} participantes</span>
+                        <span>{Array.isArray(minute.participants) ? minute.participants.length : 0} participantes</span>
                           </div>
                         </div>
                         
                         {/* Topic Groups Display */}
-                        {minute.topicGroups && minute.topicGroups.length > 0 && (
+                        {Array.isArray(minute.topicGroups) && minute.topicGroups.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
                             {minute.topicGroups.map(group => (
                               <Badge
@@ -447,7 +449,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                         )}
                         
                         {/* Tags Display */}
-                        {minute.tags && minute.tags.length > 0 && (
+                        {Array.isArray(minute.tags) && minute.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mb-2">
                             {minute.tags.map(tag => (
                               <Badge
