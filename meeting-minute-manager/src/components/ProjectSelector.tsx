@@ -41,16 +41,6 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   return (
     <div className="space-y-3">
       <Label>{label}</Label>
-      
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-  return (
-    <div className="space-y-3">
-      <Label>{label}</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -138,3 +128,6 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
       )}
     </div>
   );
+}
+
+export default ProjectSelector;
