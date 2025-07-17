@@ -54,10 +54,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tags, setTags] = useState<Tag[]>([]);
   const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([]);
 
+  // Normaliza los arrays internos de cada minuta y agrupador
+  function normalizeMinute(minute) {
+    return {
+      ...minute,
+      topicGroups: Array.isArray(minute.topicGroups)
+        ? minute.topicGroups.map(g => ({
+            ...g,
+            topicsDiscussed: Array.isArray(g.topicsDiscussed) ? g.topicsDiscussed : [],
+            decisions: Array.isArray(g.decisions) ? g.decisions : [],
+            pendingTasks: Array.isArray(g.pendingTasks) ? g.pendingTasks : []
+          }))
+        : [],
+      topicsDiscussed: Array.isArray(minute.topicsDiscussed) ? minute.topicsDiscussed : [],
+      decisions: Array.isArray(minute.decisions) ? minute.decisions : [],
+      pendingTasks: Array.isArray(minute.pendingTasks) ? minute.pendingTasks : [],
+      participants: Array.isArray(minute.participants) ? minute.participants : [],
+      occasionalParticipants: Array.isArray(minute.occasionalParticipants) ? minute.occasionalParticipants : [],
+      informedPersons: Array.isArray(minute.informedPersons) ? minute.informedPersons : [],
+      tags: Array.isArray(minute.tags) ? minute.tags : [],
+      files: Array.isArray(minute.files) ? minute.files : [],
+    };
+  }
+
   useEffect(() => {
     api.getUsers().then(setUsers);
     api.getProjects().then(setProjects);
-    api.getMinutes().then(setMinutes);
+    api.getMinutes().then(rawMinutes => setMinutes(rawMinutes.map(normalizeMinute)));
     api.getTemplates().then(setTemplates);
     api.getTags().then(setTags);
     api.getGlobalTopicGroups().then(setGlobalTopicGroups);
