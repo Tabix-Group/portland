@@ -80,11 +80,26 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
       const matchesSearch = minute.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesProject = filterProject === 'all' || (minute.projectIds && minute.projectIds.includes(filterProject));
       const matchesStatus = filterStatus === 'all' || minute.status === filterStatus;
-      const tags = Array.isArray(minute.tags) ? minute.tags : [];
-      const topicGroups = Array.isArray(minute.topicGroups) ? minute.topicGroups : [];
+      // Parse tags
+      let tags = [];
+      if (Array.isArray(minute.tags)) {
+        tags = minute.tags;
+      } else if (typeof minute.tags === 'string') {
+        try { tags = JSON.parse(minute.tags); } catch { tags = []; }
+      } else if (typeof minute.tags === 'object' && minute.tags !== null) {
+        tags = Object.values(minute.tags);
+      }
+      // Parse topicGroups
+      let topicGroups = [];
+      if (Array.isArray(minute.topicGroups)) {
+        topicGroups = minute.topicGroups;
+      } else if (typeof minute.topicGroups === 'string') {
+        try { topicGroups = JSON.parse(minute.topicGroups); } catch { topicGroups = []; }
+      } else if (typeof minute.topicGroups === 'object' && minute.topicGroups !== null) {
+        topicGroups = Object.values(minute.topicGroups);
+      }
       const matchesTags = filterTags.length === 0 || filterTags.some(tagId => tags.some(tag => tag.id === tagId));
       const matchesTopicGroups = filterTopicGroups.length === 0 || filterTopicGroups.some(groupId => topicGroups.some(group => group.id === groupId));
-      
       return matchesSearch && matchesProject && matchesStatus && matchesTags && matchesTopicGroups;
     });
   }, [userMinutes, searchTerm, filterProject, filterStatus, filterTags, filterTopicGroups]);
