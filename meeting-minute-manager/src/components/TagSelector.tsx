@@ -72,7 +72,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       <div className="space-y-2">
         <Label className="text-sm text-gray-600">Etiquetas estándar:</Label>
         <div className="flex flex-wrap gap-2">
-          {Array.isArray(STANDARD_TAGS) ? STANDARD_TAGS.map((tag) => (
+          {(Array.isArray(STANDARD_TAGS) ? STANDARD_TAGS : []).map((tag) => (
             <Button
               key={tag.id}
               type="button"
@@ -145,11 +145,11 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       )}
 
       {/* Etiquetas seleccionadas */}
-      {(Array.isArray(selectedTags) ? selectedTags.length : 0) > 0 && (
+      {selectedTags.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm text-gray-600">Etiquetas seleccionadas:</Label>
           <div className="flex flex-wrap gap-2">
-            {(Array.isArray(selectedTags) ? selectedTags : []).map((tag) => (
+            {selectedTags.map((tag) => (
               <Badge
                 key={tag.id}
                 className="flex items-center gap-1 text-white"

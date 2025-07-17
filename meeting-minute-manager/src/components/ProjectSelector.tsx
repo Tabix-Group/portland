@@ -36,9 +36,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
     onProjectsChange(selectedProjectIds.filter(id => id !== projectId));
   };
 
-  const safeProjects = Array.isArray(projects) ? projects : [];
-  const safeSelectedProjectIds = Array.isArray(selectedProjectIds) ? selectedProjectIds : [];
-  const selectedProjects = safeProjects.filter(p => safeSelectedProjectIds.includes(p.id));
+  const selectedProjects = projects.filter(p => selectedProjectIds.includes(p.id));
 
   return (
     <div className="space-y-3">
@@ -54,9 +52,9 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
             <div className="flex items-center space-x-2">
               <Search className="h-4 w-4 text-gray-400" />
               <span className="text-gray-500">
-                {safeSelectedProjectIds.length === 0
+                {selectedProjectIds.length === 0
                   ? "Seleccionar proyectos..."
-                  : `${safeSelectedProjectIds.length} proyecto${safeSelectedProjectIds.length > 1 ? 's' : ''} seleccionado${safeSelectedProjectIds.length > 1 ? 's' : ''}`
+                  : `${selectedProjectIds.length} proyecto${selectedProjectIds.length > 1 ? 's' : ''} seleccionado${selectedProjectIds.length > 1 ? 's' : ''}`
                 }
               </span>
               <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -69,7 +67,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
             <CommandList>
               <CommandEmpty>No se encontraron proyectos.</CommandEmpty>
               <CommandGroup>
-                {safeProjects.map((project) => (
+                {projects.map((project) => (
                   <CommandItem
                     key={project.id}
                     value={project.name}
@@ -77,7 +75,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                   >
                     <Check
                       className={`mr-2 h-4 w-4 ${
-                        safeSelectedProjectIds.includes(project.id) ? "opacity-100" : "opacity-0"
+                        selectedProjectIds.includes(project.id) ? "opacity-100" : "opacity-0"
                       }`}
                     />
                     <div className="flex items-center flex-1">
@@ -99,31 +97,33 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
           </Command>
         </PopoverContent>
       </Popover>
-      <div className="mb-2">
-        <Label className="text-sm font-medium">Proyectos asignados</Label>
-        <div className="text-xs text-gray-500 mb-1">
-          {safeSelectedProjectIds.length === 0
-            ? 'Ningún proyecto seleccionado'
-            : `${safeSelectedProjectIds.length} proyecto${safeSelectedProjectIds.length > 1 ? 's' : ''} seleccionado${safeSelectedProjectIds.length > 1 ? 's' : ''}`}
-        </div>
+      {(Array.isArray(selectedProjects) ? selectedProjects.length : 0) > 0 && (
         <div className="flex flex-wrap gap-2">
-          {safeProjects.map((project) => (
-            <Badge key={project.id} className="bg-gray-200 text-gray-800">
-              {project.name}
+          {selectedProjects.map(project => (
+            <Badge 
+              key={project.id} 
+              variant="outline" 
+              className="flex items-center gap-1"
+              style={{ 
+                borderColor: project.color || '#22c55e', 
+                color: project.color || '#22c55e' 
+              }}
+            >
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: project.color || '#22c55e' }}
+              />
+              #{project.name}
+              <Button
+                variant="ghost"
+                size="xs"
+                className="ml-1 p-0"
+                onClick={() => removeProject(project.id)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
             </Badge>
           ))}
-        </div>
-      </div>
-      {(Array.isArray(selectedProjects) ? selectedProjects.length : 0) > 0 && (
-        <div className="mt-2">
-          <Label className="text-sm font-medium">Proyectos seleccionados</Label>
-          <div className="flex flex-wrap gap-2">
-            {(Array.isArray(selectedProjects) ? selectedProjects : []).map(project => (
-              <Badge key={project.id} className="bg-blue-200 text-blue-800">
-                {project.name}
-              </Badge>
-            ))}
-          </div>
         </div>
       )}
     </div>
