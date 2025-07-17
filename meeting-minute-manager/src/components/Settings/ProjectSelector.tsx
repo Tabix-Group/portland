@@ -72,11 +72,11 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({ user, onUpdateUser })
           </div>
 
           {/* Current Assignments */}
-          {user.projectIds.length > 0 && (
+          {(Array.isArray(user.projectIds) ? user.projectIds.length : 0) > 0 && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Proyectos Asignados ({user.projectIds.length})</Label>
+              <Label className="text-sm font-medium">Proyectos Asignados ({(Array.isArray(user.projectIds) ? user.projectIds.length : 0)})</Label>
               <div className="flex flex-wrap gap-2">
-                {user.projectIds.map(projectId => {
+                {(Array.isArray(user.projectIds) ? user.projectIds : []).map(projectId => {
                   const project = projects.find(p => p.id === projectId);
                   if (!project) return null;
                   

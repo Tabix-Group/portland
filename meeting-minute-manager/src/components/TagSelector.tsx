@@ -72,7 +72,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       <div className="space-y-2">
         <Label className="text-sm text-gray-600">Etiquetas estándar:</Label>
         <div className="flex flex-wrap gap-2">
-          {STANDARD_TAGS.map((tag) => (
+          {(Array.isArray(STANDARD_TAGS) ? STANDARD_TAGS : []).map((tag) => (
             <Button
               key={tag.id}
               type="button"

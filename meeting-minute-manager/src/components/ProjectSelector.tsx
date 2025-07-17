@@ -55,10 +55,10 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               <span className="text-gray-500">
                 {selectedProjectIds.length === 0 
                   ? "Seleccionar proyectos..." 
-                  : `${selectedProjectIds.length} proyecto${selectedProjectIds.length > 1 ? 's' : ''} seleccionado${selectedProjectIds.length > 1 ? 's' : ''}`
+                {(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0) === 0 
+                  ? "Seleccionar proyectos..." 
+                  : `${(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0)} proyecto${(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0) > 1 ? 's' : ''} seleccionado${(Array.isArray(selectedProjectIds) ? selectedProjectIds.length : 0) > 1 ? 's' : ''}`
                 }
-              </span>
-            </div>
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -70,7 +70,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               <CommandGroup>
                 {projects.map((project) => (
                   <CommandItem
-                    key={project.id}
+                {(Array.isArray(projects) ? projects : []).map((project) => (
                     value={project.name}
                     onSelect={() => handleProjectToggle(project.id)}
                   >
@@ -99,7 +99,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         </PopoverContent>
       </Popover>
 
-      {selectedProjects.length > 0 && (
+      {(Array.isArray(selectedProjects) ? selectedProjects.length : 0) > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedProjects.map(project => (
             <Badge 
