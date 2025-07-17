@@ -52,6 +52,10 @@ const safeArrayObject = (obj: any, arrayKeys: string[]) => {
 }
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Función global para asegurar arrays
+  function safeArray<T>(arr: any): T[] {
+    return Array.isArray(arr) ? arr as T[] : [];
+  }
   const [user, setUser] = useState<AuthUser | null>(null)
   const [users, setUsers] = useState<User[]>([])
   const [projects, setProjects] = useState<Project[]>([])
@@ -173,7 +177,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const created = await api.createMinute(safeMinute)
-      setMinutes((prev) => [...safeArray(prev), normalizeMinute(created)])
+      setMinutes((prev) => [...safeArray<Minute>(prev), normalizeMinute(created)])
     } catch (error) {
       console.error("Error adding minute:", error)
       throw error
@@ -183,7 +187,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateMinute = async (id: string, updates: Partial<Minute>) => {
     try {
       const updated = await api.updateMinute(id, updates)
-      setMinutes((prev) => safeArray(prev).map((m) => (m.id === id ? normalizeMinute(updated) : m)))
+      setMinutes((prev) => safeArray<Minute>(prev).map((m) => (m.id === id ? normalizeMinute(updated) : m)))
     } catch (error) {
       console.error("Error updating minute:", error)
       throw error
@@ -193,7 +197,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteMinute = async (id: string) => {
     try {
       await api.deleteMinute(id)
-      setMinutes((prev) => safeArray(prev).filter((m) => m.id !== id))
+      setMinutes((prev) => safeArray<Minute>(prev).filter((m) => m.id !== id))
     } catch (error) {
       console.error("Error deleting minute:", error)
       throw error
@@ -214,7 +218,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProject = async (id: string, updates: Partial<Project>) => {
     try {
       const updated = await api.updateProject(id, updates)
-      setProjects((prev) => safeArray(prev).map((p) => (p.id === id ? updated : p)))
+      setProjects((prev) => safeArray<Project>(prev).map((p) => (p.id === id ? updated : p)))
     } catch (error) {
       console.error("Error updating project:", error)
       throw error
@@ -224,7 +228,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteProject = async (id: string) => {
     try {
       await api.deleteProject(id)
-      setProjects((prev) => safeArray(prev).filter((p) => p.id !== id))
+      setProjects((prev) => safeArray<Project>(prev).filter((p) => p.id !== id))
     } catch (error) {
       console.error("Error deleting project:", error)
       throw error
@@ -245,7 +249,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUser = async (id: string, updates: Partial<User>) => {
     try {
       const updated = await api.updateUser(id, updates)
-      setUsers((prev) => safeArray(prev).map((u) => (u.id === id ? updated : u)))
+      setUsers((prev) => safeArray<User>(prev).map((u) => (u.id === id ? updated : u)))
     } catch (error) {
       console.error("Error updating user:", error)
       throw error
@@ -255,7 +259,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteUser = async (id: string) => {
     try {
       await api.deleteUser(id)
-      setUsers((prev) => safeArray(prev).filter((u) => u.id !== id))
+      setUsers((prev) => safeArray<User>(prev).filter((u) => u.id !== id))
     } catch (error) {
       console.error("Error deleting user:", error)
       throw error
@@ -276,7 +280,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateTemplate = async (id: string, updates: Partial<MinuteTemplate>) => {
     try {
       const updated = await api.updateTemplate(id, updates)
-      setTemplates((prev) => safeArray(prev).map((t) => (t.id === id ? updated : t)))
+      setTemplates((prev) => safeArray<MinuteTemplate>(prev).map((t) => (t.id === id ? updated : t)))
     } catch (error) {
       console.error("Error updating template:", error)
       throw error
@@ -286,7 +290,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteTemplate = async (id: string) => {
     try {
       await api.deleteTemplate(id)
-      setTemplates((prev) => safeArray(prev).filter((t) => t.id !== id))
+      setTemplates((prev) => safeArray<MinuteTemplate>(prev).filter((t) => t.id !== id))
     } catch (error) {
       console.error("Error deleting template:", error)
       throw error
@@ -307,7 +311,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateTag = async (id: string, updates: Partial<Tag>) => {
     try {
       const updated = await api.updateTag(id, updates)
-      setTags((prev) => safeArray(prev).map((t) => (t.id === id ? updated : t)))
+      setTags((prev) => safeArray<Tag>(prev).map((t) => (t.id === id ? updated : t)))
     } catch (error) {
       console.error("Error updating tag:", error)
       throw error
@@ -317,7 +321,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteTag = async (id: string) => {
     try {
       await api.deleteTag(id)
-      setTags((prev) => safeArray(prev).filter((t) => t.id !== id))
+      setTags((prev) => safeArray<Tag>(prev).filter((t) => t.id !== id))
     } catch (error) {
       console.error("Error deleting tag:", error)
       throw error
@@ -338,7 +342,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateGlobalTopicGroup = async (id: string, updates: Partial<GlobalTopicGroup>) => {
     try {
       const updated = await api.updateGlobalTopicGroup(id, updates)
-      setGlobalTopicGroups((prev) => safeArray(prev).map((g) => (g.id === id ? updated : g)))
+      setGlobalTopicGroups((prev) => safeArray<GlobalTopicGroup>(prev).map((g) => (g.id === id ? updated : g)))
     } catch (error) {
       console.error("Error updating global topic group:", error)
       throw error
@@ -348,7 +352,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteGlobalTopicGroup = async (id: string) => {
     try {
       await api.deleteGlobalTopicGroup(id)
-      setGlobalTopicGroups((prev) => safeArray(prev).filter((g) => g.id !== id))
+      setGlobalTopicGroups((prev) => safeArray<GlobalTopicGroup>(prev).filter((g) => g.id !== id))
     } catch (error) {
       console.error("Error deleting global topic group:", error)
       throw error
