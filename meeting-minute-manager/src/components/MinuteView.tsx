@@ -137,12 +137,12 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
           <div className="space-y-2">
             <h4 className="font-medium">Participantes:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {minute.participants.map((participant) => (
+              {(Array.isArray(minute.participants) ? minute.participants : []).map((participant) => (
                 <div key={participant.id} className="flex items-center space-x-2">
                   <Badge variant="outline">{participant.name}</Badge>
                 </div>
               ))}
-              {minute.occasionalParticipants.map((participant) => (
+              {(Array.isArray(minute.occasionalParticipants) ? minute.occasionalParticipants : []).map((participant) => (
                 <div key={participant.id} className="flex items-center space-x-2">
                   <Badge variant="secondary">{participant.name} (Ocasional)</Badge>
                 </div>
@@ -163,7 +163,7 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {minute.informedPersons.map((person) => (
+              {(Array.isArray(minute.informedPersons) ? minute.informedPersons : []).map((person) => (
                 <div key={person.id} className="flex items-center justify-between bg-orange-50 p-3 rounded-lg border border-orange-200">
                   <div>
                     <div className="font-medium text-sm">{person.name}</div>
