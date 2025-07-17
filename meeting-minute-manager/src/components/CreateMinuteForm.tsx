@@ -33,7 +33,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
   const currentTime = now.toTimeString().slice(0, 5);
 
   // Calcular el próximo número de minuta
-  const nextMinuteNumber = Math.max(0, ...minutes.map(m => m.number || 0)) + 1;
+  const nextMinuteNumber = Math.max(0, ...(Array.isArray(minutes) ? minutes : []).map(m => m.number || 0)) + 1;
 
   const [formData, setFormData] = useState({
     title: selectedTemplate?.name || '',
@@ -66,7 +66,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     e.preventDefault();
     const participantIds = Array.isArray(formData.participantIds) ? formData.participantIds : [];
     const occasionalParticipants = Array.isArray(formData.occasionalParticipants) ? formData.occasionalParticipants : [];
-    if (!formData.title || !formData.meetingDate || (participantIds.length === 0 && occasionalParticipants.length === 0)) {
+    if (!formData.title || !formData.meetingDate || ((Array.isArray(participantIds) ? participantIds : []).length === 0 && (Array.isArray(occasionalParticipants) ? occasionalParticipants : []).length === 0)) {
       toast({
         title: "Error",
         description: "Por favor complete todos los campos obligatorios",
@@ -130,15 +130,15 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
     // Si hay agrupadores de temas, agregar al primer grupo, sino crear contenido general
     const topicGroups = Array.isArray(formData.topicGroups) ? formData.topicGroups : [];
-    if (topicGroups.length > 0) {
+    if (Array.isArray(topicGroups) && topicGroups.length > 0) {
       const firstGroup = formData.topicGroups[0];
-      const updatedGroups = formData.topicGroups.map(group => {
+      const updatedGroups = (Array.isArray(formData.topicGroups) ? formData.topicGroups : []).map(group => {
         if (group.id === firstGroup.id) {
           return {
             ...group,
             topicsDiscussed: [
               ...group.topicsDiscussed,
-              ...transcription.topics.map((text, index) => ({
+              ...(Array.isArray(transcription.topics) ? transcription.topics : []).map((text, index) => ({
                 id: (Date.now() + index).toString(),
                 text,
                 mentions: [],
@@ -147,7 +147,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
             ],
             decisions: [
               ...group.decisions,
-              ...transcription.decisions.map((text, index) => ({
+              ...(Array.isArray(transcription.decisions) ? transcription.decisions : []).map((text, index) => ({
                 id: (Date.now() + index + 1000).toString(),
                 text,
                 mentions: [],
@@ -156,7 +156,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
             ],
             pendingTasks: [
               ...group.pendingTasks,
-              ...transcription.tasks.map((text, index) => ({
+              ...(Array.isArray(transcription.tasks) ? transcription.tasks : []).map((text, index) => ({
                 id: (Date.now() + index + 2000).toString(),
                 text,
                 assignedTo: '',
@@ -173,21 +173,21 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       setFormData(prev => ({ ...prev, topicGroups: updatedGroups }));
     } else {
       // Agregar a las secciones tradicionales
-      const newTopics = transcription.topics.map((text, index) => ({
+      const newTopics = (Array.isArray(transcription.topics) ? transcription.topics : []).map((text, index) => ({
         id: (Date.now() + index).toString(),
         text,
         mentions: [],
         projectIds: []
       }));
       
-      const newDecisions = transcription.decisions.map((text, index) => ({
+      const newDecisions = (Array.isArray(transcription.decisions) ? transcription.decisions : []).map((text, index) => ({
         id: (Date.now() + index + 1000).toString(),
         text,
         mentions: [],
         projectIds: []
       }));
       
-      const newTasks = transcription.tasks.map((text, index) => ({
+      const newTasks = (Array.isArray(transcription.tasks) ? transcription.tasks : []).map((text, index) => ({
         id: (Date.now() + index + 2000).toString(),
         text,
         assignedTo: '',
