@@ -39,12 +39,13 @@ export const createTask = (data: any) => request("/tasks", { method: "POST", bod
 export const updateTask = (id: string, data: any) => request(`/tasks/${id}`, { method: "PUT", body: JSON.stringify(data) });
 export const deleteTask = (id: string) => request(`/tasks/${id}`, { method: "DELETE" });
 
-// Attachments
-export const getAttachments = () => request("/attachments");
-export const getAttachment = (id: string) => request(`/attachments/${id}`);
-export const createAttachment = (data: any) => request("/attachments", { method: "POST", body: JSON.stringify(data) });
-export const updateAttachment = (id: string, data: any) => request(`/attachments/${id}`, { method: "PUT", body: JSON.stringify(data) });
-export const deleteAttachment = (id: string) => request(`/attachments/${id}`, { method: "DELETE" });
+
+// Tags
+export const getTags = () => request("/tags");
+export const getTag = (id: string) => request(`/tags/${id}`);
+export const createTag = (data: any) => request("/tags", { method: "POST", body: JSON.stringify(data) });
+export const updateTag = (id: string, data: any) => request(`/tags/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteTag = (id: string) => request(`/tags/${id}`, { method: "DELETE" });
 
 
 // Templates
