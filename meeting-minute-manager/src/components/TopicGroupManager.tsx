@@ -84,7 +84,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
   };
 
   const updateTopicGroup = (groupId: string, updates: Partial<TopicGroup>) => {
-    onTopicGroupsChange(topicGroups.map(group => 
+    onTopicGroupsChange((Array.isArray(topicGroups) ? topicGroups : []).map(group => 
       group.id === groupId ? { ...group, ...updates } : group
     ));
   };
@@ -122,7 +122,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
     const group = topicGroups.find(g => g.id === groupId);
     if (!group) return;
 
-    const updatedItems = group[section].map((item: any) =>
+    const updatedItems = (Array.isArray(group[section]) ? group[section] : []).map((item: any) =>
       item.id === itemId ? { ...item, ...updates } : item
     );
 
@@ -149,7 +149,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
           <Label className="text-lg font-medium">Agrupadores de Contenido</Label>
         </div>
         <div className="flex space-x-2">
-          {availableGlobalGroups.length > 0 && (
+          {Array.isArray(availableGlobalGroups) && availableGlobalGroups.length > 0 && (
             <Select onValueChange={(value) => {
               const globalGroup = globalTopicGroups.find(g => g.id === value);
               if (globalGroup) createTopicGroupFromGlobal(globalGroup);
@@ -158,7 +158,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                 <SelectValue placeholder="Agregar agrupador existente" />
               </SelectTrigger>
               <SelectContent>
-                {availableGlobalGroups.map((group) => (
+                {(Array.isArray(availableGlobalGroups) ? availableGlobalGroups : []).map((group) => (
                   <SelectItem key={group.id} value={group.id}>
                     <div className="flex items-center space-x-2">
                       <div
@@ -209,7 +209,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
             <div className="space-y-2">
               <Label className="text-sm">Color:</Label>
               <div className="flex space-x-2">
-                {TOPIC_GROUP_COLORS.map(color => (
+                {(Array.isArray(TOPIC_GROUP_COLORS) ? TOPIC_GROUP_COLORS : []).map(color => (
                   <button
                     key={color}
                     type="button"
@@ -240,7 +240,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
         </Card>
       )}
 
-      {topicGroups.length === 0 ? (
+      {(Array.isArray(topicGroups) ? topicGroups : []).length === 0 ? (
         <div className="text-center py-6 text-gray-500">
           <FolderOpen className="h-12 w-12 mx-auto mb-2 text-gray-300" />
           <p>No hay agrupadores agregados</p>
@@ -248,7 +248,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
         </div>
       ) : (
         <Accordion type="multiple" className="space-y-2">
-          {topicGroups.map((group) => (
+          {(Array.isArray(topicGroups) ? topicGroups : []).map((group) => (
             <AccordionItem key={group.id} value={group.id} className="border rounded-lg">
               <AccordionTrigger className="px-4 hover:no-underline">
                 <div className="flex items-center space-x-3">
@@ -283,7 +283,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                       </Button>
                     </div>
                     <div className="space-y-2">
-                      {group.topicsDiscussed.map((topic) => (
+                      {(Array.isArray(group.topicsDiscussed) ? group.topicsDiscussed : []).map((topic) => (
                         <div key={topic.id} className="flex gap-2">
                           <MentionTextInput
                             value={topic.text}
@@ -326,7 +326,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                       </Button>
                     </div>
                     <div className="space-y-2">
-                      {group.decisions.map((decision) => (
+                      {(Array.isArray(group.decisions) ? group.decisions : []).map((decision) => (
                         <div key={decision.id} className="flex gap-2">
                           <MentionTextInput
                             value={decision.text}
@@ -369,7 +369,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                       </Button>
                     </div>
                     <div className="space-y-3">
-                      {group.pendingTasks.map((task) => (
+                      {(Array.isArray(group.pendingTasks) ? group.pendingTasks : []).map((task) => (
                         <div key={task.id} className="space-y-2 p-3 border rounded bg-gray-50">
                           <div className="flex gap-2">
                             <MentionTextInput
@@ -405,7 +405,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                                   <SelectValue placeholder="Seleccionar..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {users.map((user) => (
+                                  {(Array.isArray(users) ? users : []).map((user) => (
                                     <SelectItem key={user.id} value={user.id}>
                                       {user.name}
                                     </SelectItem>
