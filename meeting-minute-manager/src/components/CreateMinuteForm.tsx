@@ -90,22 +90,42 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       return;
     }
 
-    // Normalización profunda y universal de arrays en minute y topicGroups
-    // Importa safeArray y safeArrayObject desde DataContext si no está ya importado
-    // 1. Normaliza topicGroups y sus arrays internos
-    const normalizedTopicGroups = (Array.isArray(formData.topicGroups) ? formData.topicGroups : []).map(g =>
-      window.safeArrayObject ? window.safeArrayObject(g, [
-        'topicsDiscussed', 'decisions', 'pendingTasks']) :
-        {
-          ...g,
-          topicsDiscussed: Array.isArray(g.topicsDiscussed) ? g.topicsDiscussed : [],
-          decisions: Array.isArray(g.decisions) ? g.decisions : [],
-          pendingTasks: Array.isArray(g.pendingTasks) ? g.pendingTasks : [],
-        }
-    );
 
-    // 2. Normaliza el objeto minute completo
-    const minuteRaw = {
+    // Normalización profunda y recursiva de todos los arrays en Minute y sus hijos
+    function normalizeMinuteLocal(minute) {
+      // Normaliza arrays de primer nivel
+      const safe = (arr) => Array.isArray(arr) ? arr : [];
+      const norm = { ...minute };
+      norm.participantIds = safe(norm.participantIds);
+      norm.participants = safe(norm.participants);
+      norm.occasionalParticipants = safe(norm.occasionalParticipants);
+      norm.informedPersons = safe(norm.informedPersons);
+      norm.topicGroups = safe(norm.topicGroups).map(g => ({
+        ...g,
+        topicsDiscussed: safe(g.topicsDiscussed),
+        decisions: safe(g.decisions),
+        pendingTasks: safe(g.pendingTasks)
+      }));
+      norm.topicsDiscussed = safe(norm.topicsDiscussed);
+      norm.decisions = safe(norm.decisions);
+      norm.pendingTasks = safe(norm.pendingTasks);
+      norm.tags = safe(norm.tags);
+      norm.files = safe(norm.files);
+      norm.projectIds = safe(norm.projectIds);
+      // Normaliza arrays internos de items
+      norm.topicsDiscussed = norm.topicsDiscussed.map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
+      norm.decisions = norm.decisions.map(d => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) }));
+      norm.pendingTasks = norm.pendingTasks.map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
+      norm.topicGroups = norm.topicGroups.map(g => ({
+        ...g,
+        topicsDiscussed: safe(g.topicsDiscussed).map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) })),
+        decisions: safe(g.decisions).map(d => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) })),
+        pendingTasks: safe(g.pendingTasks).map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }))
+      }));
+      return norm;
+    }
+
+    const minute = normalizeMinuteLocal({
       number: nextMinuteNumber,
       title: formData.title,
       meetingDate: formData.meetingDate,
@@ -113,29 +133,22 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       nextMeetingDate: formData.nextMeetingDate,
       nextMeetingTime: formData.nextMeetingTime,
       nextMeetingNotes: formData.nextMeetingNotes,
-      participantIds: Array.isArray(formData.participantIds) ? formData.participantIds : [],
+      participantIds: formData.participantIds,
       participants: users.filter(u => Array.isArray(formData.participantIds) ? formData.participantIds.includes(u.id) : false),
-      occasionalParticipants: Array.isArray(formData.occasionalParticipants) ? formData.occasionalParticipants : [],
-      informedPersons: Array.isArray(formData.informedPersons) ? formData.informedPersons : [],
-      topicGroups: normalizedTopicGroups,
-      topicsDiscussed: Array.isArray(formData.topicsDiscussed) ? formData.topicsDiscussed : [],
-      decisions: Array.isArray(formData.decisions) ? formData.decisions : [],
-      pendingTasks: Array.isArray(formData.pendingTasks) ? formData.pendingTasks : [],
+      occasionalParticipants: formData.occasionalParticipants,
+      informedPersons: formData.informedPersons,
+      topicGroups: formData.topicGroups,
+      topicsDiscussed: formData.topicsDiscussed,
+      decisions: formData.decisions,
+      pendingTasks: formData.pendingTasks,
       internalNotes: formData.internalNotes,
-      tags: Array.isArray(formData.tags) ? formData.tags : [],
-      files: Array.isArray(formData.files) ? formData.files : [],
+      tags: formData.tags,
+      files: formData.files,
       status: 'draft' as 'draft' | 'published',
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
-      projectIds: Array.isArray(formData.projectIds) ? formData.projectIds : [],
-    };
-
-    // 3. Normaliza todos los arrays del objeto minute (por si viene de otro origen)
-    const arrayKeys = [
-      'participantIds', 'participants', 'occasionalParticipants', 'informedPersons',
-      'topicGroups', 'topicsDiscussed', 'decisions', 'pendingTasks', 'tags', 'files', 'projectIds'
-    ];
-    const minute = window.safeArrayObject ? window.safeArrayObject(minuteRaw, arrayKeys) : minuteRaw;
+      projectIds: formData.projectIds,
+    });
 
     addMinute(minute);
 
