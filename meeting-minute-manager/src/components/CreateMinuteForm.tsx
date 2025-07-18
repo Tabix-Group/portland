@@ -90,10 +90,22 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       return;
     }
 
-    // Limpiar arrays y asegurar que los campos sean válidos y nunca undefined
-    const safeArray = (arr) => Array.isArray(arr) ? arr : [];
-    const cleanArray = (arr) => Array.isArray(arr) ? arr.filter(item => item && (item.text ? item.text.trim() !== '' : true)) : [];
-    const minute = {
+    // Normalización profunda y universal de arrays en minute y topicGroups
+    // Importa safeArray y safeArrayObject desde DataContext si no está ya importado
+    // 1. Normaliza topicGroups y sus arrays internos
+    const normalizedTopicGroups = (Array.isArray(formData.topicGroups) ? formData.topicGroups : []).map(g =>
+      window.safeArrayObject ? window.safeArrayObject(g, [
+        'topicsDiscussed', 'decisions', 'pendingTasks']) :
+        {
+          ...g,
+          topicsDiscussed: Array.isArray(g.topicsDiscussed) ? g.topicsDiscussed : [],
+          decisions: Array.isArray(g.decisions) ? g.decisions : [],
+          pendingTasks: Array.isArray(g.pendingTasks) ? g.pendingTasks : [],
+        }
+    );
+
+    // 2. Normaliza el objeto minute completo
+    const minuteRaw = {
       number: nextMinuteNumber,
       title: formData.title,
       meetingDate: formData.meetingDate,
@@ -101,27 +113,29 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       nextMeetingDate: formData.nextMeetingDate,
       nextMeetingTime: formData.nextMeetingTime,
       nextMeetingNotes: formData.nextMeetingNotes,
-      participantIds: safeArray(formData.participantIds),
-      participants: users.filter(u => safeArray(formData.participantIds).includes(u.id)),
-      occasionalParticipants: safeArray(formData.occasionalParticipants),
-      informedPersons: safeArray(formData.informedPersons),
-      topicGroups: safeArray(formData.topicGroups).map(g => ({
-        ...g,
-        topicsDiscussed: cleanArray(g.topicsDiscussed),
-        decisions: cleanArray(g.decisions),
-        pendingTasks: cleanArray(g.pendingTasks)
-      })),
-      topicsDiscussed: cleanArray(formData.topicsDiscussed),
-      decisions: cleanArray(formData.decisions),
-      pendingTasks: cleanArray(formData.pendingTasks),
+      participantIds: Array.isArray(formData.participantIds) ? formData.participantIds : [],
+      participants: users.filter(u => Array.isArray(formData.participantIds) ? formData.participantIds.includes(u.id) : false),
+      occasionalParticipants: Array.isArray(formData.occasionalParticipants) ? formData.occasionalParticipants : [],
+      informedPersons: Array.isArray(formData.informedPersons) ? formData.informedPersons : [],
+      topicGroups: normalizedTopicGroups,
+      topicsDiscussed: Array.isArray(formData.topicsDiscussed) ? formData.topicsDiscussed : [],
+      decisions: Array.isArray(formData.decisions) ? formData.decisions : [],
+      pendingTasks: Array.isArray(formData.pendingTasks) ? formData.pendingTasks : [],
       internalNotes: formData.internalNotes,
-      tags: safeArray(formData.tags),
-      files: safeArray(formData.files),
+      tags: Array.isArray(formData.tags) ? formData.tags : [],
+      files: Array.isArray(formData.files) ? formData.files : [],
       status: 'draft' as 'draft' | 'published',
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
-      projectIds: safeArray(formData.projectIds),
+      projectIds: Array.isArray(formData.projectIds) ? formData.projectIds : [],
     };
+
+    // 3. Normaliza todos los arrays del objeto minute (por si viene de otro origen)
+    const arrayKeys = [
+      'participantIds', 'participants', 'occasionalParticipants', 'informedPersons',
+      'topicGroups', 'topicsDiscussed', 'decisions', 'pendingTasks', 'tags', 'files', 'projectIds'
+    ];
+    const minute = window.safeArrayObject ? window.safeArrayObject(minuteRaw, arrayKeys) : minuteRaw;
 
     addMinute(minute);
 
