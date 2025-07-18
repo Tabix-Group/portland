@@ -361,9 +361,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addGlobalTopicGroup,
     updateGlobalTopicGroup,
     deleteGlobalTopicGroup,
-  }
+  };
 
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
 
 export const useData = () => {
