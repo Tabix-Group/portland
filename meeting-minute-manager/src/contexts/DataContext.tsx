@@ -64,50 +64,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Normalizes arrays in minute objects and topic groups
   function normalizeMinute(minute: any): Minute {
     if (!minute) return minute;
-
-    return {
-      ...minute,
-      topicGroups: safeArray<TopicGroup>(minute.topicGroups).map((g: TopicGroup) => ({
-        ...g,
-        topicsDiscussed: safeArray<MinuteItem>(g.topicsDiscussed).map((t: MinuteItem) => ({
-          ...t,
-          mentions: safeArray<string>(t.mentions),
-          projectIds: safeArray<string>(t.projectIds),
-        })),
-        decisions: safeArray<MinuteItem>(g.decisions).map((d: MinuteItem) => ({
-          ...d,
-          mentions: safeArray<string>(d.mentions),
-          projectIds: safeArray<string>(d.projectIds),
-        })),
-        pendingTasks: safeArray<Task>(g.pendingTasks).map((t: Task) => ({
-          ...t,
-          mentions: safeArray<string>(t.mentions),
-          projectIds: safeArray<string>(t.projectIds),
-        })),
-      })),
-      topicsDiscussed: safeArray<MinuteItem>(minute.topicsDiscussed).map((t: MinuteItem) => ({
-        ...t,
-        mentions: safeArray<string>(t.mentions),
-        projectIds: safeArray<string>(t.projectIds),
-      })),
-      decisions: safeArray<MinuteItem>(minute.decisions).map((d: MinuteItem) => ({
-        ...d,
-        mentions: safeArray<string>(d.mentions),
-        projectIds: safeArray<string>(d.projectIds),
-      })),
-      pendingTasks: safeArray<Task>(minute.pendingTasks).map((t: Task) => ({
-        ...t,
-        mentions: safeArray<string>(t.mentions),
-        projectIds: safeArray<string>(t.projectIds),
-      })),
-      participants: safeArray<string>(minute.participants),
-      occasionalParticipants: safeArray<string>(minute.occasionalParticipants),
-      informedPersons: safeArray<string>(minute.informedPersons),
-      tags: safeArray<string>(minute.tags),
-      files: safeArray<string>(minute.files),
-      projectIds: safeArray<string>(minute.projectIds),
-      participantIds: safeArray<string>(minute.participantIds),
-      externalMentions: safeArray<string>(minute.externalMentions),
+    // Recursivo y exhaustivo: asegura que todos los arrays y subarrays estén definidos
+    const safe = (arr: any) => Array.isArray(arr) ? arr : [];
+    const norm = { ...minute };
+    norm.topicGroups = safe(norm.topicGroups).map((g: any) => ({
+      ...g,
+      topicsDiscussed: safe(g.topicsDiscussed).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) })),
+      decisions: safe(g.decisions).map((d: any) => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) })),
+      pendingTasks: safe(g.pendingTasks).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) })),
+    }));
+    norm.topicsDiscussed = safe(norm.topicsDiscussed).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
+    norm.decisions = safe(norm.decisions).map((d: any) => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) }));
+    norm.pendingTasks = safe(norm.pendingTasks).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
+    norm.participants = safe(norm.participants);
+    norm.occasionalParticipants = safe(norm.occasionalParticipants);
+    norm.informedPersons = safe(norm.informedPersons);
+    norm.tags = safe(norm.tags);
+    norm.files = safe(norm.files);
+    norm.projectIds = safe(norm.projectIds);
+    norm.participantIds = safe(norm.participantIds);
+    norm.externalMentions = safe(norm.externalMentions);
+    return norm;
     };
   }
 

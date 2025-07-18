@@ -91,41 +91,8 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     }
 
 
-    // Normalización profunda y recursiva de todos los arrays en Minute y sus hijos
-    function normalizeMinuteLocal(minute) {
-      // Normaliza arrays de primer nivel
-      const safe = (arr) => Array.isArray(arr) ? arr : [];
-      const norm = { ...minute };
-      norm.participantIds = safe(norm.participantIds);
-      norm.participants = safe(norm.participants);
-      norm.occasionalParticipants = safe(norm.occasionalParticipants);
-      norm.informedPersons = safe(norm.informedPersons);
-      norm.topicGroups = safe(norm.topicGroups).map(g => ({
-        ...g,
-        topicsDiscussed: safe(g.topicsDiscussed),
-        decisions: safe(g.decisions),
-        pendingTasks: safe(g.pendingTasks)
-      }));
-      norm.topicsDiscussed = safe(norm.topicsDiscussed);
-      norm.decisions = safe(norm.decisions);
-      norm.pendingTasks = safe(norm.pendingTasks);
-      norm.tags = safe(norm.tags);
-      norm.files = safe(norm.files);
-      norm.projectIds = safe(norm.projectIds);
-      // Normaliza arrays internos de items
-      norm.topicsDiscussed = norm.topicsDiscussed.map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
-      norm.decisions = norm.decisions.map(d => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) }));
-      norm.pendingTasks = norm.pendingTasks.map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
-      norm.topicGroups = norm.topicGroups.map(g => ({
-        ...g,
-        topicsDiscussed: safe(g.topicsDiscussed).map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) })),
-        decisions: safe(g.decisions).map(d => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) })),
-        pendingTasks: safe(g.pendingTasks).map(t => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }))
-      }));
-      return norm;
-    }
-
-    const minute = normalizeMinuteLocal({
+    // Normalización global: DataContext se encarga de arrays
+    const minute = {
       number: nextMinuteNumber,
       title: formData.title,
       meetingDate: formData.meetingDate,
