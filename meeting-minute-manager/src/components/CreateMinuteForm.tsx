@@ -115,7 +115,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
       projectIds: formData.projectIds,
-    });
+    };
 
     addMinute(minute);
 
