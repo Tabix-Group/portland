@@ -56,6 +56,21 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     projectIds: Array.isArray(selectedTemplate?.projectIds) ? selectedTemplate?.projectIds : []
   });
 
+  // Refuerzo: si topicGroups se inicializa manualmente, asegurar arrays internos
+  React.useEffect(() => {
+    if (formData.topicGroups.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        topicGroups: prev.topicGroups.map(g => ({
+          ...g,
+          topicsDiscussed: Array.isArray(g.topicsDiscussed) ? g.topicsDiscussed : [],
+          decisions: Array.isArray(g.decisions) ? g.decisions : [],
+          pendingTasks: Array.isArray(g.pendingTasks) ? g.pendingTasks : [],
+        }))
+      }));
+    }
+  }, [formData.topicGroups]);
+
   const userProjects = user?.role === 'admin' 
     ? projects 
     : projects.filter(p => user?.projectIds.includes(p.id));
