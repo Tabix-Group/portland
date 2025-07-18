@@ -75,7 +75,8 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       return;
     }
 
-    // Limpiar arrays y asegurar que los campos sean válidos
+    // Limpiar arrays y asegurar que los campos sean válidos y nunca undefined
+    const safeArray = (arr) => Array.isArray(arr) ? arr : [];
     const cleanArray = (arr) => Array.isArray(arr) ? arr.filter(item => item && (item.text ? item.text.trim() !== '' : true)) : [];
     const minute = {
       number: nextMinuteNumber,
@@ -85,26 +86,26 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       nextMeetingDate: formData.nextMeetingDate,
       nextMeetingTime: formData.nextMeetingTime,
       nextMeetingNotes: formData.nextMeetingNotes,
-      participantIds: formData.participantIds,
-      participants: users.filter(u => formData.participantIds.includes(u.id)),
-      occasionalParticipants: cleanArray(formData.occasionalParticipants),
-      informedPersons: cleanArray(formData.informedPersons),
-      topicGroups: Array.isArray(formData.topicGroups) ? formData.topicGroups.map(g => ({
+      participantIds: safeArray(formData.participantIds),
+      participants: users.filter(u => safeArray(formData.participantIds).includes(u.id)),
+      occasionalParticipants: safeArray(formData.occasionalParticipants),
+      informedPersons: safeArray(formData.informedPersons),
+      topicGroups: safeArray(formData.topicGroups).map(g => ({
         ...g,
-        topicsDiscussed: Array.isArray(g.topicsDiscussed) ? cleanArray(g.topicsDiscussed) : [],
-        decisions: Array.isArray(g.decisions) ? cleanArray(g.decisions) : [],
-        pendingTasks: Array.isArray(g.pendingTasks) ? cleanArray(g.pendingTasks) : []
-      })) : [],
+        topicsDiscussed: cleanArray(g.topicsDiscussed),
+        decisions: cleanArray(g.decisions),
+        pendingTasks: cleanArray(g.pendingTasks)
+      })),
       topicsDiscussed: cleanArray(formData.topicsDiscussed),
       decisions: cleanArray(formData.decisions),
       pendingTasks: cleanArray(formData.pendingTasks),
       internalNotes: formData.internalNotes,
-      tags: Array.isArray(formData.tags) ? formData.tags : [],
-      files: Array.isArray(formData.files) ? formData.files : [],
+      tags: safeArray(formData.tags),
+      files: safeArray(formData.files),
       status: 'draft' as 'draft' | 'published',
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
-      projectIds: Array.isArray(formData.projectIds) ? formData.projectIds : [],
+      projectIds: safeArray(formData.projectIds),
     };
 
     addMinute(minute);
