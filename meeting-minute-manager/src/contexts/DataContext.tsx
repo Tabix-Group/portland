@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import * as api from "../lib/api"
-import type { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup, TopicGroup, MinuteItem, Task } from "@/types"
+import type { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup } from "@/types"
 
 interface DataContextType {
   user: AuthUser | null
@@ -39,53 +39,76 @@ const DataContext = createContext<DataContextType | undefined>(undefined)
 
 // Helper function to safely ensure arrays (global, single definition)
 function safeArray<T>(arr: any): T[] {
-  return Array.isArray(arr) ? arr as T[] : [];
+  return Array.isArray(arr) ? (arr as T[]) : []
 }
 
 // Helper function to safely ensure object with arrays
 function safeArrayObject(obj: any, arrayKeys: string[]) {
-  if (!obj || typeof obj !== "object") return obj;
-  const result = { ...obj };
+  if (!obj || typeof obj !== "object") return obj
+  const result = { ...obj }
   arrayKeys.forEach((key) => {
-    result[key] = safeArray(result[key]);
-  });
-  return result;
+    result[key] = safeArray(result[key])
+  })
+  return result
 }
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [minutes, setMinutes] = useState<Minute[]>([]);
-  const [templates, setTemplates] = useState<MinuteTemplate[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([]);
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [users, setUsers] = useState<User[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [minutes, setMinutes] = useState<Minute[]>([])
+  const [templates, setTemplates] = useState<MinuteTemplate[]>([])
+  const [tags, setTags] = useState<Tag[]>([])
+  const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([])
 
   // Normalizes arrays in minute objects and topic groups
   function normalizeMinute(minute: any): Minute {
-    if (!minute) return minute;
+    if (!minute) return minute
     // Recursivo y exhaustivo: asegura que todos los arrays y subarrays estén definidos
-    const safe = (arr: any) => Array.isArray(arr) ? arr : [];
-    const norm = { ...minute };
+    const safe = (arr: any) => (Array.isArray(arr) ? arr : [])
+    const norm = { ...minute }
     norm.topicGroups = safe(norm.topicGroups).map((g: any) => ({
       ...g,
-      topicsDiscussed: safe(g.topicsDiscussed).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) })),
-      decisions: safe(g.decisions).map((d: any) => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) })),
-      pendingTasks: safe(g.pendingTasks).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) })),
-    }));
-    norm.topicsDiscussed = safe(norm.topicsDiscussed).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
-    norm.decisions = safe(norm.decisions).map((d: any) => ({ ...d, mentions: safe(d.mentions), projectIds: safe(d.projectIds) }));
-    norm.pendingTasks = safe(norm.pendingTasks).map((t: any) => ({ ...t, mentions: safe(t.mentions), projectIds: safe(t.projectIds) }));
-    norm.participants = safe(norm.participants);
-    norm.occasionalParticipants = safe(norm.occasionalParticipants);
-    norm.informedPersons = safe(norm.informedPersons);
-    norm.tags = safe(norm.tags);
-    norm.files = safe(norm.files);
-    norm.projectIds = safe(norm.projectIds);
-    norm.participantIds = safe(norm.participantIds);
-    norm.externalMentions = safe(norm.externalMentions);
-    return norm;
-    };
+      topicsDiscussed: safe(g.topicsDiscussed).map((t: any) => ({
+        ...t,
+        mentions: safe(t.mentions),
+        projectIds: safe(t.projectIds),
+      })),
+      decisions: safe(g.decisions).map((d: any) => ({
+        ...d,
+        mentions: safe(d.mentions),
+        projectIds: safe(d.projectIds),
+      })),
+      pendingTasks: safe(g.pendingTasks).map((t: any) => ({
+        ...t,
+        mentions: safe(t.mentions),
+        projectIds: safe(t.projectIds),
+      })),
+    }))
+    norm.topicsDiscussed = safe(norm.topicsDiscussed).map((t: any) => ({
+      ...t,
+      mentions: safe(t.mentions),
+      projectIds: safe(t.projectIds),
+    }))
+    norm.decisions = safe(norm.decisions).map((d: any) => ({
+      ...d,
+      mentions: safe(d.mentions),
+      projectIds: safe(d.projectIds),
+    }))
+    norm.pendingTasks = safe(norm.pendingTasks).map((t: any) => ({
+      ...t,
+      mentions: safe(t.mentions),
+      projectIds: safe(t.projectIds),
+    }))
+    norm.participants = safe(norm.participants)
+    norm.occasionalParticipants = safe(norm.occasionalParticipants)
+    norm.informedPersons = safe(norm.informedPersons)
+    norm.tags = safe(norm.tags)
+    norm.files = safe(norm.files)
+    norm.projectIds = safe(norm.projectIds)
+    norm.participantIds = safe(norm.participantIds)
+    norm.externalMentions = safe(norm.externalMentions)
+    return norm
   }
 
   useEffect(() => {
@@ -361,15 +384,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addGlobalTopicGroup,
     updateGlobalTopicGroup,
     deleteGlobalTopicGroup,
-  };
+  }
 
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
-};
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>
+}
 
 export const useData = () => {
-  const context = useContext(DataContext);
+  const context = useContext(DataContext)
   if (!context) {
-    throw new Error("useData must be used within a DataProvider");
+    throw new Error("useData must be used within a DataProvider")
   }
-  return context;
-};
+  return context
+}
