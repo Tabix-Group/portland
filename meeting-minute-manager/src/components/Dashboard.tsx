@@ -22,30 +22,36 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
 
   // Filter projects based on user access
   const userProjects = useMemo(() => {
+    if (!Array.isArray(projects)) return [];
     if (user?.role === 'admin' || !user?.hasLimitedAccess) {
       return projects;
     }
+    if (!Array.isArray(user?.projectIds)) return [];
     return projects.filter(project => user.projectIds.includes(project.id));
   }, [projects, user]);
 
   // Filter minutes based on user permissions and project access
   const userMinutes = useMemo(() => {
+    if (!Array.isArray(minutes)) return [];
     return minutes.filter(minute => {
       // Admin can see all minutes
       if (user?.role === 'admin') return true;
       
       // Users with limited access can only see minutes from their assigned projects
-      if (user?.hasLimitedAccess && minute.projectIds && minute.projectIds.length > 0) {
+      if (user?.hasLimitedAccess && Array.isArray(minute.projectIds) && minute.projectIds.length > 0) {
+        if (!Array.isArray(user?.projectIds)) return false;
         return minute.projectIds.some(projectId => user.projectIds.includes(projectId));
       }
       
       // Regular users can see minutes they participate in
+      if (!Array.isArray(minute.participantIds)) return false;
       return minute.participantIds.includes(user?.id || '');
     });
   }, [minutes, user]);
 
   // Calculate stats
   const stats = useMemo(() => {
+    if (!Array.isArray(userMinutes)) return { draft: 0, published: 0, total: 0 };
     const draft = userMinutes.filter(m => m.status === 'draft').length;
     const published = userMinutes.filter(m => m.status === 'published').length;
     
@@ -120,14 +126,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Analytics */}
           <div className="lg:col-span-2">
-            <AnalyticCards minutes={userMinutes} users={users} />
+            <AnalyticCards minutes={Array.isArray(userMinutes) ? userMinutes : []} users={Array.isArray(users) ? users : []} />
           </div>
           
           {/* Activity Timeline */}
           <div>
             <ActivityTimeline 
-              minutes={userMinutes} 
-              users={users} 
+              minutes={Array.isArray(userMinutes) ? userMinutes : []} 
+              users={Array.isArray(users) ? users : []} 
               currentUserId={user?.id || ''}
             />
           </div>

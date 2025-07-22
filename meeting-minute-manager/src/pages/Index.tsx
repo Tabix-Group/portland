@@ -23,6 +23,7 @@ const AppContent = () => {
   }
 
   const handleCreateMinute = () => {
+    console.log("Creating minute...");
     setCurrentPage('template-selector');
   };
 
@@ -32,6 +33,7 @@ const AppContent = () => {
   };
 
   const handleViewMinute = (id: string) => {
+    console.log(`Viewing minute with ID: ${id}`);
     setSelectedMinuteId(id);
     setCurrentPage('view-minute');
   };

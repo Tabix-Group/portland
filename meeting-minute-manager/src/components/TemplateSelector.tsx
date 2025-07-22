@@ -15,6 +15,12 @@ interface TemplateSelectorProps {
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onBack, onSelectTemplate }) => {
   const { templates } = useData();
 
+  // Debugging: verificar si templates está undefined
+  if (templates === undefined) {
+    console.error('TemplateSelector: templates is undefined!');
+    return <div>Cargando plantillas...</div>;
+  }
+
   const handleStandardMinute = () => {
     onSelectTemplate(null);
   };
@@ -59,11 +65,11 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onBack, onSelectTem
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Plantillas Disponibles</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {(Array.isArray(templates) ? templates : []).map((template) => (
-              <Card 
-                key={template.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleTemplateSelect(template)}
-              >
+              <Card
+  key={template.id}
+  className="cursor-pointer hover:shadow-md transition-shadow"
+  onClick={() => handleTemplateSelect(template)}
+>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${template.color}`}>
@@ -77,17 +83,17 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onBack, onSelectTem
                   </div>
                   <CardTitle className="text-base">{template.name}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                 <CardContent>
                   <p className="text-sm text-gray-600 mb-3">{template.description}</p>
                   <div className="space-y-2">
                     <div className="text-xs text-gray-500">
-                      <span className="font-medium">Temas:</span> {template.sections.topicsDiscussed.length}
+                      <span className="font-medium">Temas:</span> {template.sections?.topicsDiscussed?.length || 0}
                     </div>
                     <div className="text-xs text-gray-500">
-                      <span className="font-medium">Decisiones:</span> {template.sections.decisions.length}
+                      <span className="font-medium">Decisiones:</span> {template.sections?.decisions?.length || 0}
                     </div>
                     <div className="text-xs text-gray-500">
-                      <span className="font-medium">Tareas:</span> {template.sections.pendingTasks.length}
+                      <span className="font-medium">Tareas:</span> {template.sections?.pendingTasks?.length || 0}
                     </div>
                   </div>
                 </CardContent>
