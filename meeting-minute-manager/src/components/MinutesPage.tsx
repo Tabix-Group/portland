@@ -186,6 +186,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     }
   }
 
+  // Estado local para edición de tareas reales
+  const [editTasks, setEditTasks] = useState<any[]>([]);
   const handleEditMinute = (minute: Minute) => {
     setEditMinute(minute);
     setEditStatus(minute.status || 'draft');
@@ -194,6 +196,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     setEditTagIds(safeArray(minute.tags).map((t:any) => t.id));
     setEditTopicGroupIds(safeArray(minute.topicGroups).map((g:any) => g.id));
     setEditParticipantIds(minute.participantIds || []);
+    // Cargar tareas reales asociadas a la minuta (si existen)
+    fetch(`/api/minutes/${minute.id}/tasks`).then(r => r.json()).then(setEditTasks).catch(() => setEditTasks([]));
   };
   const handleDeleteMinute = (minute: Minute) => setShowDeleteConfirm(minute);
 
@@ -202,7 +206,6 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     const newTitle = editTitleRef.current?.value || editMinute.title;
     try {
       await updateMinute(editMinute.id, {
-        // Campos requeridos del modelo Minute
         number: editMinute.number,
         title: newTitle,
         meetingDate: editDate,
@@ -217,7 +220,6 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         topicGroups: editMinute.topicGroups || [],
         topicsDiscussed: editMinute.topicsDiscussed || [],
         decisions: editMinute.decisions || [],
-        pendingTasks: editMinute.pendingTasks || [],
         internalNotes: editMinute.internalNotes || '',
         tags: editMinute.tags || [],
         files: editMinute.files || [],
@@ -226,10 +228,12 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         createdAt: editMinute.createdAt || new Date().toISOString(),
         projectIds: editProjectIds,
         externalMentions: editMinute.externalMentions || [],
-        // Si tienes tagIds y topicGroupIds como campos separados en backend, puedes agregarlos aquí
+        // Enviar tareas reales (SQL) al backend
+        tasks: editTasks,
       });
       toast({ title: 'Minuta actualizada', description: 'La minuta fue actualizada correctamente.' });
       setEditMinute(null);
+      setEditTasks([]);
     } catch (e) {
       toast({ title: 'Error', description: 'No se pudo actualizar la minuta', variant: 'destructive' });
     }
@@ -583,6 +587,63 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
             <DialogTitle>Editar Minuta</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {/* TAREAS REALES (SQL) */}
+            <label className="block text-sm font-medium">Tareas</label>
+            <div className="space-y-2">
+              {editTasks.map((task, idx) => (
+                <div key={task.id || idx} className="flex items-center gap-2">
+                  <Input
+                    className="flex-1"
+                    value={task.text || ''}
+                    placeholder="Descripción de la tarea"
+                    onChange={e => {
+                      const newTasks = [...editTasks];
+                      newTasks[idx] = { ...task, text: e.target.value };
+                      setEditTasks(newTasks);
+                    }}
+                  />
+                  <Select
+                    value={task.assignedTo || ''}
+                    onValueChange={v => {
+                      const newTasks = [...editTasks];
+                      newTasks[idx] = { ...task, assignedTo: v };
+                      setEditTasks(newTasks);
+                    }}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Asignado a" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin asignar</SelectItem>
+                      {users.map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {/* Grupo de tema para la tarea */}
+                  <Select
+                    value={task.groupId || ''}
+                    onValueChange={v => {
+                      const newTasks = [...editTasks];
+                      newTasks[idx] = { ...task, groupId: v };
+                      setEditTasks(newTasks);
+                    }}
+                  >
+                    <SelectTrigger className="w-36">
+                      <SelectValue placeholder="Agrupador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin agrupador</SelectItem>
+                      {allTopicGroups.map(group => (
+                        <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button size="sm" variant="destructive" onClick={() => setEditTasks(editTasks.filter((_, i) => i !== idx))}>Eliminar</Button>
+                </div>
+              ))}
+              <Button size="sm" variant="outline" onClick={() => setEditTasks([...editTasks, { text: '', assignedTo: '', completed: false, groupId: '' }])}>Agregar tarea</Button>
+            </div>
             <label className="block text-sm font-medium">Título</label>
             <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
 

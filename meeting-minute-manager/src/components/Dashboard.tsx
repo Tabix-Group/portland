@@ -17,7 +17,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onCreateFromTemplate }) => {
   const { user } = useAuth();
-  const { minutes, projects, users } = useData();
+  const { minutes, projects, users, getTasksForMinute } = useData();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Filter projects based on user access
@@ -126,7 +126,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Analytics */}
           <div className="lg:col-span-2">
-            <AnalyticCards minutes={Array.isArray(userMinutes) ? userMinutes : []} users={Array.isArray(users) ? users : []} />
+            <AnalyticCards 
+              minutes={Array.isArray(userMinutes) ? userMinutes : []} 
+              users={Array.isArray(users) ? users : []} 
+              getTasksForMinute={getTasksForMinute}
+            />
           </div>
           
           {/* Activity Timeline */}

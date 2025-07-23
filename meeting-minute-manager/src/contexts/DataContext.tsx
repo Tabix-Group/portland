@@ -5,6 +5,8 @@ import { createContext, useState, useContext, useEffect } from "react"
 import * as api from "../lib/api"
 import type { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup } from "@/types"
 
+import type { Task } from "@/types"
+
 interface DataContextType {
   user: AuthUser | null
   users: User[]
@@ -13,6 +15,8 @@ interface DataContextType {
   templates: MinuteTemplate[]
   tags: Tag[]
   globalTopicGroups: GlobalTopicGroup[]
+  minuteTasks: Record<string, Task[]>
+  getTasksForMinute: (minuteId: string) => Task[]
   login: (user: AuthUser) => void
   logout: () => void
   addMinute: (minute: Omit<Minute, "id">) => void
@@ -60,6 +64,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [templates, setTemplates] = useState<MinuteTemplate[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [globalTopicGroups, setGlobalTopicGroups] = useState<GlobalTopicGroup[]>([])
+  const [minuteTasks, setMinuteTasks] = useState<Record<string, Task[]>>({})
 
   // Normalizes arrays in minute objects and topic groups
   function normalizeMinute(minute: any): Minute {
@@ -125,10 +130,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setUsers(safeArray(usersData))
         setProjects(safeArray(projectsData))
-        setMinutes(safeArray(minutesData).map(normalizeMinute))
+        const normalizedMinutes = safeArray(minutesData).map(normalizeMinute)
+        setMinutes(normalizedMinutes)
         setTemplates(safeArray(templatesData))
         setTags(safeArray(tagsData))
         setGlobalTopicGroups(safeArray(topicGroupsData))
+
+        // Fetch tasks for each minute and store in minuteTasks
+        const tasksByMinute: Record<string, Task[]> = {}
+        await Promise.all(
+          normalizedMinutes.map(async (minute) => {
+            try {
+              const tasks = await api.getTasksByMinute(minute.id)
+              tasksByMinute[minute.id] = safeArray(tasks)
+            } catch (e) {
+              tasksByMinute[minute.id] = []
+            }
+          })
+        )
+        setMinuteTasks(tasksByMinute)
       } catch (error) {
         console.error("Error loading data:", error)
         // Set empty arrays as fallback
@@ -138,11 +158,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setTemplates([])
         setTags([])
         setGlobalTopicGroups([])
+        setMinuteTasks({})
       }
     }
 
     loadData()
   }, [])
+  // Helper to get tasks for a minute
+  const getTasksForMinute = (minuteId: string) => {
+    return minuteTasks[minuteId] || []
+  }
 
   const login = (user: AuthUser) => {
     setUser(user)
@@ -364,6 +389,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     templates,
     tags,
     globalTopicGroups,
+    minuteTasks,
+    getTasksForMinute,
     login,
     logout,
     addMinute,

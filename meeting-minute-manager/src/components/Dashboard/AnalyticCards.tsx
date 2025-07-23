@@ -1,15 +1,17 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import { Minute, User } from '@/types';
+import type { Minute, User, Task } from '@/types';
 import { TrendingUp, Users, Calendar, CheckCircle, Clock } from 'lucide-react';
 
-interface AnalyticCardsProps {
+
+type AnalyticCardsProps = {
   minutes: Minute[];
   users: User[];
-}
+  getTasksForMinute: (minuteId: string) => Task[];
+};
 
-const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
+const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users, getTasksForMinute }) => {
   // Calcular tendencias de reuniones por mes
   const getMonthlyTrends = () => {
     const monthlyData: Record<string, number> = {};
@@ -202,7 +204,7 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
         </CardContent>
       </Card>
 
-      {/* Tareas pendientes (incluye root y topicGroups) */}
+      {/* Tareas pendientes (solo tareas reales de SQL) */}
       <Card className="h-fit">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center space-x-2 text-base">
@@ -214,13 +216,8 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {minutes
               .map(minute => {
-                // Combina tareas pendientes root y de topicGroups
-                const rootPending = Array.isArray(minute.pendingTasks) ? minute.pendingTasks.filter(task => !task.completed) : [];
-                const groupPending = Array.isArray(minute.topicGroups)
-                  ? minute.topicGroups.flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks.filter(task => !task.completed) : [])
-                  : [];
-                const allPending = [...rootPending, ...groupPending];
-                if (allPending.length === 0) return null;
+                const realTasks = getTasksForMinute(minute.id).filter(task => !task.completed);
+                if (realTasks.length === 0) return null;
                 return (
                   <div key={minute.id} className="flex justify-between items-center p-2 bg-orange-50 rounded-lg">
                     <div className="flex-1 min-w-0">
@@ -228,7 +225,7 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
                       <p className="text-xs text-gray-600">
                         {new Date(minute.meetingDate).toLocaleDateString()}
                       </p>
-                      {allPending.map((task, idx) => {
+                      {realTasks.map((task, idx) => {
                         const assignedUser = users.find(u => u.id === task.assignedTo);
                         return (
                           <div key={task.id} className="flex items-center text-xs text-orange-900 mt-1">
@@ -239,25 +236,22 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
                                 {assignedUser.name}
                               </span>
                             )}
+                            {task.dueDate && (
+                              <span className="ml-2 text-orange-700">Vence: {new Date(task.dueDate).toLocaleDateString()}</span>
+                            )}
                           </div>
                         );
                       })}
                     </div>
                     <div className="text-orange-600 font-bold text-sm ml-2">
-                      {allPending.length}
+                      {realTasks.length}
                     </div>
                   </div>
                 );
               })
               .filter(Boolean)
               .slice(0, 5)}
-            {minutes.every(minute => {
-              const rootPending = Array.isArray(minute.pendingTasks) ? minute.pendingTasks.filter(task => !task.completed) : [];
-              const groupPending = Array.isArray(minute.topicGroups)
-                ? minute.topicGroups.flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks.filter(task => !task.completed) : [])
-                : [];
-              return rootPending.length === 0 && groupPending.length === 0;
-            }) && (
+            {minutes.every(minute => getTasksForMinute(minute.id).filter(task => !task.completed).length === 0) && (
               <div className="text-center py-4 text-gray-500 text-sm">
                 No hay tareas pendientes
               </div>

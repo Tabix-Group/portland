@@ -1,3 +1,5 @@
+// Obtener tareas por minuta
+export const getTasksByMinute = (minuteId: string) => request(`/minutes/${minuteId}/tasks`);
 // API client for all entities
 
 export const BASE_URL = "https://portland-be-production.up.railway.app/api"; // URL real del backend en Railway

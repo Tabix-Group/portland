@@ -1,3 +1,8 @@
+// GET tasks for a minute
+router.get('/:id/tasks', async (req, res) => {
+  const tasks = await prisma.task.findMany({ where: { minuteId: req.params.id } });
+  res.json(tasks);
+});
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
@@ -36,7 +41,7 @@ router.get('/', async (req, res) => {
 
 // GET minute item by id
 router.get('/:id', async (req, res) => {
-  const minute = await prisma.minuteItem.findUnique({ where: { id: req.params.id } });
+  const minute = await prisma.minute.findUnique({ where: { id: req.params.id } });
   // Normalizar arrays en la respuesta
   const safe = arr => Array.isArray(arr) ? arr : [];
   const normalizeMinute = (minute) => {
@@ -67,7 +72,15 @@ router.get('/:id', async (req, res) => {
 // POST create minute
 router.post('/', async (req, res) => {
   try {
-    const minute = await prisma.minute.create({ data: req.body });
+    // Extraer tareas del body y quitarlas del objeto principal
+    const { tasks, ...minuteData } = req.body;
+    const minute = await prisma.minute.create({ data: minuteData });
+    // Crear tareas si vienen en el body
+    if (Array.isArray(tasks)) {
+      for (const task of tasks) {
+        await prisma.task.create({ data: { ...task, minuteId: minute.id } });
+      }
+    }
     // Normalizar arrays en la respuesta
     const safe = arr => Array.isArray(arr) ? arr : [];
     const normalizeMinute = (minute) => {
@@ -99,9 +112,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT update minute item
+// PUT update minute
 router.put('/:id', async (req, res) => {
-  const minute = await prisma.minuteItem.update({ where: { id: req.params.id }, data: req.body });
+  // Extraer tareas del body y quitarlas del objeto principal
+  const { tasks, ...minuteData } = req.body;
+  const minute = await prisma.minute.update({ where: { id: req.params.id }, data: minuteData });
+  // Sincronizar tareas: eliminar las existentes y crear las nuevas
+  await prisma.task.deleteMany({ where: { minuteId: req.params.id } });
+  if (Array.isArray(tasks)) {
+    for (const task of tasks) {
+      await prisma.task.create({ data: { ...task, minuteId: req.params.id } });
+    }
+  }
   // Normalizar arrays en la respuesta
   const safe = arr => Array.isArray(arr) ? arr : [];
   const normalizeMinute = (minute) => {
@@ -129,10 +151,12 @@ router.put('/:id', async (req, res) => {
   res.json(normalizeMinute(minute));
 });
 
-// DELETE minute item
+// DELETE minute
 router.delete('/:id', async (req, res) => {
-  await prisma.minuteItem.delete({ where: { id: req.params.id } });
-  res.json({ message: 'Minute item deleted' });
+  // Eliminar tareas asociadas primero
+  await prisma.task.deleteMany({ where: { minuteId: req.params.id } });
+  await prisma.minute.delete({ where: { id: req.params.id } });
+  res.json({ message: 'Minute and related tasks deleted' });
 });
 
 module.exports = router;
