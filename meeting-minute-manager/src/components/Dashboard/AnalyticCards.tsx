@@ -216,8 +216,10 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
               .filter(minute => minute.pendingTasks.some(task => !task.completed))
               .slice(0, 5)
               .map(minute => {
-                const pendingTasksCount = minute.pendingTasks.filter(task => !task.completed).length;
-                
+                const pendingTasks = minute.pendingTasks.filter(task => !task.completed);
+                // Obtener todos los usuarios asignados únicos
+                const assignedUserIds = Array.from(new Set(pendingTasks.map(task => task.assignedTo).filter(Boolean)));
+                const assignedUsers = assignedUserIds.map(userId => users.find(u => u.id === userId)).filter(Boolean);
                 return (
                   <div key={minute.id} className="flex justify-between items-center p-2 bg-orange-50 rounded-lg">
                     <div className="flex-1 min-w-0">
@@ -225,9 +227,18 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
                       <p className="text-xs text-gray-600">
                         {new Date(minute.meetingDate).toLocaleDateString()}
                       </p>
+                      {assignedUsers.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {assignedUsers.map(user => (
+                            <span key={user.id} className="inline-block bg-orange-200 text-orange-800 text-xs px-2 py-0.5 rounded">
+                              {user.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="text-orange-600 font-bold text-sm ml-2">
-                      {pendingTasksCount}
+                      {pendingTasks.length}
                     </div>
                   </div>
                 );
