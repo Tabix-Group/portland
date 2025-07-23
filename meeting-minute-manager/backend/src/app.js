@@ -11,7 +11,6 @@ app.use(express.json());
 // Import routes
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/minutes', require('./routes/minutes'));
 app.use('/api/tasks', require('./routes/tasks'));
