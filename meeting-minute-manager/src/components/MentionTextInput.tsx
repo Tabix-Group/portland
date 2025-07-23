@@ -148,7 +148,7 @@ const MentionTextInput: React.FC<MentionTextInputProps> = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 w-full min-w-[400px]">
       <div className="relative">
         <Input
           ref={inputRef}
@@ -156,7 +156,7 @@ const MentionTextInput: React.FC<MentionTextInputProps> = ({
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
-          className="w-full"
+          className="w-full min-w-[400px]"
         />
         
         {showSuggestions && (
