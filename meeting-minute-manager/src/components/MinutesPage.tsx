@@ -49,6 +49,12 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const { updateMinute, deleteMinute } = useData();
   const { toast } = useToast();
   const editTitleRef = useRef<HTMLInputElement>(null);
+  const [editStatus, setEditStatus] = useState<string>(editMinute?.status || 'draft');
+  const [editDate, setEditDate] = useState<string>(editMinute ? editMinute.meetingDate?.slice(0, 10) : '');
+  const [editProjectIds, setEditProjectIds] = useState<string[]>(editMinute?.projectIds || []);
+  const [editTagIds, setEditTagIds] = useState<string[]>(editMinute?.tags?.map((t:any) => t.id) || []);
+  const [editTopicGroupIds, setEditTopicGroupIds] = useState<string[]>(editMinute?.topicGroups?.map((g:any) => g.id) || []);
+  const [editParticipantIds, setEditParticipantIds] = useState<string[]>(editMinute?.participantIds || []);
 
   // Helper function to safely get array
   const safeArray = (arr: any): any[] => (Array.isArray(arr) ? arr : [])
@@ -180,14 +186,30 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     }
   }
 
-  const handleEditMinute = (minute: Minute) => setEditMinute(minute);
+  const handleEditMinute = (minute: Minute) => {
+    setEditMinute(minute);
+    setEditStatus(minute.status || 'draft');
+    setEditDate(minute.meetingDate?.slice(0, 10) || '');
+    setEditProjectIds(minute.projectIds || []);
+    setEditTagIds(safeArray(minute.tags).map((t:any) => t.id));
+    setEditTopicGroupIds(safeArray(minute.topicGroups).map((g:any) => g.id));
+    setEditParticipantIds(minute.participantIds || []);
+  };
   const handleDeleteMinute = (minute: Minute) => setShowDeleteConfirm(minute);
 
   const handleEditSave = async () => {
     if (!editMinute) return;
     const newTitle = editTitleRef.current?.value || editMinute.title;
     try {
-      await updateMinute(editMinute.id, { title: newTitle });
+      await updateMinute(editMinute.id, {
+        title: newTitle,
+        status: editStatus as 'draft' | 'published',
+        meetingDate: editDate,
+        projectIds: editProjectIds,
+        tagIds: editTagIds,
+        topicGroupIds: editTopicGroupIds,
+        participantIds: editParticipantIds,
+      });
       toast({ title: 'Minuta actualizada', description: 'La minuta fue actualizada correctamente.' });
       setEditMinute(null);
     } catch (e) {
@@ -545,6 +567,81 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
           <div className="space-y-4">
             <label className="block text-sm font-medium">Título</label>
             <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
+
+            <label className="block text-sm font-medium">Estado</label>
+            <Select value={editStatus} onValueChange={setEditStatus}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Borrador</SelectItem>
+                <SelectItem value="published">Publicada</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <label className="block text-sm font-medium">Fecha de reunión</label>
+            <input
+              type="date"
+              className="w-full border rounded px-2 py-1"
+              value={editDate}
+              onChange={e => setEditDate(e.target.value)}
+            />
+
+            <label className="block text-sm font-medium">Proyecto(s)</label>
+            <Select
+              value={editProjectIds[0] || ''}
+              onValueChange={v => setEditProjectIds([v])}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar proyecto" />
+              </SelectTrigger>
+              <SelectContent>
+                {userProjects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <label className="block text-sm font-medium">Etiquetas</label>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map(tag => (
+                <Badge
+                  key={tag.id}
+                  className={`cursor-pointer ${editTagIds.includes(tag.id) ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  style={{ backgroundColor: editTagIds.includes(tag.id) ? tag.color : undefined }}
+                  onClick={() => setEditTagIds(editTagIds.includes(tag.id) ? editTagIds.filter(id => id !== tag.id) : [...editTagIds, tag.id])}
+                >
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+
+            <label className="block text-sm font-medium">Agrupadores</label>
+            <div className="flex flex-wrap gap-2">
+              {allTopicGroups.map(group => (
+                <Badge
+                  key={group.id}
+                  className={`cursor-pointer ${editTopicGroupIds.includes(group.id) ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  style={{ backgroundColor: editTopicGroupIds.includes(group.id) ? group.color : undefined }}
+                  onClick={() => setEditTopicGroupIds(editTopicGroupIds.includes(group.id) ? editTopicGroupIds.filter(id => id !== group.id) : [...editTopicGroupIds, group.id])}
+                >
+                  {group.name}
+                </Badge>
+              ))}
+            </div>
+
+            <label className="block text-sm font-medium">Participantes</label>
+            <div className="flex flex-wrap gap-2">
+              {users.map(u => (
+                <Badge
+                  key={u.id}
+                  className={`cursor-pointer ${editParticipantIds.includes(u.id) ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                  onClick={() => setEditParticipantIds(editParticipantIds.includes(u.id) ? editParticipantIds.filter(id => id !== u.id) : [...editParticipantIds, u.id])}
+                >
+                  {u.name}
+                </Badge>
+              ))}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditMinute(null)}>Cancelar</Button>
