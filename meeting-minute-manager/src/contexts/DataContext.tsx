@@ -19,7 +19,7 @@ interface DataContextType {
   getTasksForMinute: (minuteId: string) => Task[]
   login: (user: AuthUser) => void
   logout: () => void
-  addMinute: (minute: Omit<Minute, "id">) => void
+  addMinute: (minute: Omit<Minute, "id">) => Promise<Minute>
   updateMinute: (id: string, updates: Partial<Minute>) => void
   deleteMinute: (id: string) => void
   addProject: (project: Omit<Project, "id">) => void
@@ -178,6 +178,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   // MINUTES CRUD
+  // Devuelve el minuto creado (con id)
   const addMinute = async (minute: Omit<Minute, "id">) => {
     try {
       // Ensure all arrays are properly initialized
@@ -200,6 +201,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const created = await api.createMinute(safeMinute)
       setMinutes((prev) => [...safeArray<Minute>(prev), normalizeMinute(created)])
+      return created;
     } catch (error) {
       console.error("Error adding minute:", error)
       throw error

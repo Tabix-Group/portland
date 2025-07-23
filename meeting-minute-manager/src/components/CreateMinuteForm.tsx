@@ -133,14 +133,25 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       tasks: cleanedTasks,
     };
 
-    addMinute(minute);
-
-    toast({
-      title: "Minuta creada",
-      description: `La minuta #${nextMinuteNumber} ha sido creada exitosamente`,
-    });
-
-    onSuccess();
+    // Guardar la minuta y luego las tareas SQL asociadas
+    (async () => {
+      const createdMinute = await addMinute(minute);
+      // Si hay tareas, crear cada una en SQL (Task) con minuteId
+      if (cleanedTasks.length > 0 && createdMinute && (createdMinute as any).id) {
+        for (const task of cleanedTasks) {
+          await fetch(`/api/tasks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...task, minuteId: (createdMinute as any).id })
+          });
+        }
+      }
+      toast({
+        title: "Minuta creada",
+        description: `La minuta #${nextMinuteNumber} ha sido creada exitosamente`,
+      });
+      onSuccess();
+    })();
   };
 
   const handleAITranscription = (transcription: {

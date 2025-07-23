@@ -162,47 +162,6 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users, getTasksF
         </CardContent>
       </Card>
 
-      {/* Distribución de estados */}
-      <Card className="h-fit">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center space-x-2 text-base">
-            <CheckCircle className="h-4 w-4 text-purple-600" />
-            <span>Estado de Minutas</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="h-48 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                <Pie
-                  data={statusDistribution}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={60}
-                  dataKey="value"
-                  label={({ name, value, percent }) => 
-                    value > 0 ? `${name}: ${(percent * 100).toFixed(0)}%` : null
-                  }
-                  labelLine={false}
-                  fontSize={10}
-                >
-                  {statusDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
-                    border: '1px solid #ccc', 
-                    borderRadius: '4px',
-                    fontSize: '12px'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Tareas pendientes (solo tareas reales de SQL) */}
       <Card className="h-fit">
