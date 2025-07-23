@@ -296,6 +296,14 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                               mentions={topic.mentions || []}
                               projectIds={topic.projectIds || []}
                               placeholder="Describe el tema tratado..."
+                              onKeyPress={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  if (topic.text.trim() !== '') {
+                                    addItemToSection(group.id, 'topicsDiscussed');
+                                  }
+                                }
+                              }}
                             />
                           </div>
                           <Button
@@ -341,6 +349,14 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                               mentions={decision.mentions || []}
                               projectIds={decision.projectIds || []}
                               placeholder="Describe la decisión tomada..."
+                              onKeyPress={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  if (decision.text.trim() !== '') {
+                                    addItemToSection(group.id, 'decisions');
+                                  }
+                                }
+                              }}
                             />
                           </div>
                           <Button
@@ -387,6 +403,14 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                                 mentions={task.mentions || []}
                                 projectIds={task.projectIds || []}
                                 placeholder="Describe la tarea..."
+                                onKeyPress={e => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    if (task.text.trim() !== '') {
+                                      addItemToSection(group.id, 'pendingTasks');
+                                    }
+                                  }
+                                }}
                               />
                             </div>
                             <Button

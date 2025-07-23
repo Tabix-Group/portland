@@ -92,6 +92,20 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     }
 
 
+
+    // Limpiar y validar tareas antes de enviar (igual que en edición)
+    const cleanedTasks = (Array.isArray(formData.pendingTasks) ? formData.pendingTasks : [])
+      .filter(t => t.text && t.text.trim() !== '')
+      .map(t => ({
+        ...t,
+        assignedTo: t.assignedTo || '',
+        dueDate: t.dueDate || '',
+        completed: !!t.completed,
+        mentions: Array.isArray(t.mentions) ? t.mentions : [],
+        projectIds: Array.isArray(t.projectIds) ? t.projectIds : [],
+        groupId: t.groupId || undefined,
+      }));
+
     // Normalización global: DataContext se encarga de arrays
     const minute = {
       number: nextMinuteNumber,
@@ -116,6 +130,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
       projectIds: formData.projectIds,
+      tasks: cleanedTasks,
     };
 
     addMinute(minute);
