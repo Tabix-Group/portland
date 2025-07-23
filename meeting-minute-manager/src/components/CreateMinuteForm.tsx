@@ -93,8 +93,9 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
 
 
-    // Limpiar y validar tareas antes de enviar (igual que en edición)
-    const cleanedTasks = (Array.isArray(formData.pendingTasks) ? formData.pendingTasks : [])
+    // Limpiar y validar tareas de topicGroups y de pendingTasks raíz
+    const groupTasks = (Array.isArray(formData.topicGroups) ? formData.topicGroups : [])
+      .flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks : [])
       .filter(t => t.text && t.text.trim() !== '')
       .map(t => ({
         ...t,
@@ -103,8 +104,20 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
         completed: !!t.completed,
         mentions: Array.isArray(t.mentions) ? t.mentions : [],
         projectIds: Array.isArray(t.projectIds) ? t.projectIds : [],
-        groupId: t.groupId || undefined,
+        ...(t.groupId ? { groupId: t.groupId } : {}),
       }));
+    const rootTasks = (Array.isArray(formData.pendingTasks) ? formData.pendingTasks : [])
+      .filter(t => t.text && t.text.trim() !== '')
+      .map(t => ({
+        ...t,
+        assignedTo: t.assignedTo || '',
+        dueDate: t.dueDate || '',
+        completed: !!t.completed,
+        mentions: Array.isArray(t.mentions) ? t.mentions : [],
+        projectIds: Array.isArray(t.projectIds) ? t.projectIds : [],
+        ...(t.groupId ? { groupId: t.groupId } : {}),
+      }));
+    const cleanedTasks = [...groupTasks, ...rootTasks];
 
     // Normalización global: DataContext se encarga de arrays
     const minute = {
@@ -133,19 +146,9 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       tasks: cleanedTasks,
     };
 
-    // Guardar la minuta y luego las tareas SQL asociadas
+    // Guardar la minuta y mostrar feedback
     (async () => {
-      const createdMinute = await addMinute(minute);
-      // Si hay tareas, crear cada una en SQL (Task) con minuteId
-      if (cleanedTasks.length > 0 && createdMinute && (createdMinute as any).id) {
-        for (const task of cleanedTasks) {
-          await fetch(`/api/tasks`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...task, minuteId: (createdMinute as any).id })
-          });
-        }
-      }
+      await addMinute(minute);
       toast({
         title: "Minuta creada",
         description: `La minuta #${nextMinuteNumber} ha sido creada exitosamente`,
