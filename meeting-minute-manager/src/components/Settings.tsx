@@ -35,7 +35,8 @@ const Settings: React.FC = () => {
     addUser, updateUser, addProject, updateProject, 
     addTemplate, updateTemplate, deleteTemplate,
     addTag, updateTag, deleteTag,
-    addGlobalTopicGroup, updateGlobalTopicGroup, deleteGlobalTopicGroup
+    addGlobalTopicGroup, updateGlobalTopicGroup, deleteGlobalTopicGroup,
+    deleteUser
   } = useData();
   
   const [activeTab, setActiveTab] = useState('users');
@@ -217,7 +218,7 @@ const Settings: React.FC = () => {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => deleteUser(user.id)}>
                           <Trash className="h-4 w-4" />
                         </Button>
                       </div>
