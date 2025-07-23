@@ -1,12 +1,14 @@
+
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 // GET tasks for a minute
 router.get('/:id/tasks', async (req, res) => {
   const tasks = await prisma.task.findMany({ where: { minuteId: req.params.id } });
   res.json(tasks);
 });
-const express = require('express');
-const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
 
 // GET all minute items
 // GET all minutes
