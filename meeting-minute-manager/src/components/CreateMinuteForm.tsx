@@ -53,7 +53,8 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     internalNotes: '',
     tags: [],
     files: [],
-    projectIds: Array.isArray(selectedTemplate?.projectIds) ? selectedTemplate?.projectIds : []
+    projectIds: Array.isArray(selectedTemplate?.projectIds) ? selectedTemplate?.projectIds : [],
+    status: 'draft' as 'draft' | 'published',
   });
 
   // Refuerzo: si topicGroups se inicializa manualmente, asegurar arrays internos
@@ -111,7 +112,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       internalNotes: formData.internalNotes,
       tags: formData.tags,
       files: formData.files,
-      status: 'draft' as 'draft' | 'published',
+      status: formData.status,
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
       projectIds: formData.projectIds,
@@ -257,7 +258,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
                 required
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="meetingDate">Fecha de la Reunión *</Label>
@@ -308,6 +309,20 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
                   placeholder="Agenda/notas..."
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="status">Estado de la minuta *</Label>
+              <select
+                id="status"
+                value={formData.status}
+                onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
+                className="block w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring focus:ring-blue-200"
+                required
+              >
+                <option value="draft">Borrador</option>
+                <option value="published">Publicado</option>
+              </select>
             </div>
 
             <ProjectSelector
