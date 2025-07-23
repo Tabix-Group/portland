@@ -36,7 +36,7 @@ const Settings: React.FC = () => {
     addTemplate, updateTemplate, deleteTemplate,
     addTag, updateTag, deleteTag,
     addGlobalTopicGroup, updateGlobalTopicGroup, deleteGlobalTopicGroup,
-    deleteUser
+    deleteUser, deleteProject
   } = useData();
   
   const [activeTab, setActiveTab] = useState('users');
@@ -57,6 +57,7 @@ const Settings: React.FC = () => {
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [newGroupColor, setNewGroupColor] = useState(TOPIC_GROUP_COLORS[0]);
   const [editingGroup, setEditingGroup] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<string | null>(null);
 
   // ...existing code...
 
@@ -354,12 +355,45 @@ const Settings: React.FC = () => {
                         style={{ backgroundColor: project.color || '#22c55e' }}
                       />
                       <div>
-                        <h3 className="text-lg font-semibold">{project.name}</h3>
-                        <p className="text-gray-500">{project.description}</p>
+                        {editingProject === project.id ? (
+                          <>
+                            <Input
+                              className="mb-2"
+                              value={project.name}
+                              onChange={(e) => updateProject(project.id, { name: e.target.value })}
+                              placeholder="Nombre del proyecto"
+                            />
+                            <Textarea
+                              value={project.description || ''}
+                              onChange={(e) => updateProject(project.id, { description: e.target.value })}
+                              placeholder="Descripción del proyecto"
+                            />
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {PREDEFINED_COLORS.map((color) => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  className={`w-8 h-8 rounded-full border-2 ${project.color === color ? 'border-gray-800' : 'border-gray-300'}`}
+                                  style={{ backgroundColor: color }}
+                                  onClick={() => updateProject(project.id, { color })}
+                                />
+                              ))}
+                            </div>
+                            <div className="flex justify-end space-x-2 mt-2">
+                              <Button variant="ghost" onClick={() => setEditingProject(null)}>Cancelar</Button>
+                              <Button onClick={() => setEditingProject(null)}>Guardar</Button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <h3 className="text-lg font-semibold">{project.name}</h3>
+                            <p className="text-gray-500">{project.description}</p>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => setEditingProject(project.id)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => deleteProject(project.id)}>
@@ -573,18 +607,36 @@ const Settings: React.FC = () => {
                 {templates.map((template) => (
                   <div key={template.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <h3 className="text-lg font-semibold">{template.name}</h3>
-                      <p className="text-gray-500">{template.description}</p>
+                      {editingTag === template.id ? (
+                        <>
+                          <Input
+                            className="mb-2"
+                            value={template.name}
+                            onChange={(e) => updateTemplate(template.id, { name: e.target.value })}
+                            placeholder="Nombre de la plantilla"
+                          />
+                          <Textarea
+                            value={template.description || ''}
+                            onChange={(e) => updateTemplate(template.id, { description: e.target.value })}
+                            placeholder="Descripción de la plantilla"
+                          />
+                          <div className="flex justify-end space-x-2 mt-2">
+                            <Button variant="ghost" onClick={() => setEditingTag(null)}>Cancelar</Button>
+                            <Button onClick={() => setEditingTag(null)}>Guardar</Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h3 className="text-lg font-semibold">{template.name}</h3>
+                          <p className="text-gray-500">{template.description}</p>
+                        </>
+                      )}
                     </div>
                     <div className="space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => {
-                        // Implement edit template functionality
-                      }}>
+                      <Button variant="ghost" size="sm" onClick={() => setEditingTag(template.id)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => {
-                        deleteTemplate(template.id)
-                      }}>
+                      <Button variant="ghost" size="sm" onClick={() => deleteTemplate(template.id)}>
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
