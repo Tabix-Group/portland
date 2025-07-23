@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { useAuth } from "@/contexts/AuthContext"
 import { useData } from "@/contexts/DataContext"
+import type { Minute } from '@/types';
 import {
   Plus,
   Search,
@@ -25,6 +26,8 @@ import {
   Tag,
   FolderOpen,
 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface MinutesPageProps {
   onCreateMinute: () => void
@@ -41,6 +44,11 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const [filterTopicGroups, setFilterTopicGroups] = useState<string[]>([])
   const [tagSelectorOpen, setTagSelectorOpen] = useState(false)
   const [topicGroupSelectorOpen, setTopicGroupSelectorOpen] = useState(false)
+  const [editMinute, setEditMinute] = useState<Minute | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<Minute | null>(null);
+  const { updateMinute, deleteMinute } = useData();
+  const { toast } = useToast();
+  const editTitleRef = useRef<HTMLInputElement>(null);
 
   // Helper function to safely get array
   const safeArray = (arr: any): any[] => (Array.isArray(arr) ? arr : [])
@@ -171,6 +179,32 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         return AlertCircle
     }
   }
+
+  const handleEditMinute = (minute: Minute) => setEditMinute(minute);
+  const handleDeleteMinute = (minute: Minute) => setShowDeleteConfirm(minute);
+
+  const handleEditSave = async () => {
+    if (!editMinute) return;
+    const newTitle = editTitleRef.current?.value || editMinute.title;
+    try {
+      await updateMinute(editMinute.id, { title: newTitle });
+      toast({ title: 'Minuta actualizada', description: 'La minuta fue actualizada correctamente.' });
+      setEditMinute(null);
+    } catch (e) {
+      toast({ title: 'Error', description: 'No se pudo actualizar la minuta', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!showDeleteConfirm) return;
+    try {
+      await deleteMinute(showDeleteConfirm.id);
+      toast({ title: 'Minuta eliminada', description: 'La minuta fue eliminada.' });
+      setShowDeleteConfirm(null);
+    } catch (e) {
+      toast({ title: 'Error', description: 'No se pudo eliminar la minuta', variant: 'destructive' });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -496,82 +530,42 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                     )}
                   </div>
                 )
-// --- MODAL Y LÓGICA DE EDICIÓN/BORRADO ---
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useRef } from 'react';
-
-// ...existing code...
-
-const [editMinute, setEditMinute] = useState<Minute | null>(null);
-const [showDeleteConfirm, setShowDeleteConfirm] = useState<Minute | null>(null);
-const { updateMinute, deleteMinute } = useData();
-const { toast } = useToast();
-const editTitleRef = useRef<HTMLInputElement>(null);
-
-const handleEditMinute = (minute: Minute) => setEditMinute(minute);
-const handleDeleteMinute = (minute: Minute) => setShowDeleteConfirm(minute);
-
-const handleEditSave = async () => {
-  if (!editMinute) return;
-  const newTitle = editTitleRef.current?.value || editMinute.title;
-  try {
-    await updateMinute(editMinute.id, { title: newTitle });
-    toast({ title: 'Minuta actualizada', description: 'La minuta fue actualizada correctamente.' });
-    setEditMinute(null);
-  } catch (e) {
-    toast({ title: 'Error', description: 'No se pudo actualizar la minuta', variant: 'destructive' });
-  }
-};
-
-const handleDeleteConfirm = async () => {
-  if (!showDeleteConfirm) return;
-  try {
-    await deleteMinute(showDeleteConfirm.id);
-    toast({ title: 'Minuta eliminada', description: 'La minuta fue eliminada.' });
-    setShowDeleteConfirm(null);
-  } catch (e) {
-    toast({ title: 'Error', description: 'No se pudo eliminar la minuta', variant: 'destructive' });
-  }
-};
-
-// ...existing code...
-
-{/* MODAL DE EDICIÓN */}
-<Dialog open={!!editMinute} onOpenChange={v => !v && setEditMinute(null)}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Editar Minuta</DialogTitle>
-    </DialogHeader>
-    <div className="space-y-4">
-      <label className="block text-sm font-medium">Título</label>
-      <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
-    </div>
-    <DialogFooter>
-      <Button variant="outline" onClick={() => setEditMinute(null)}>Cancelar</Button>
-      <Button onClick={handleEditSave}>Guardar</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-{/* MODAL DE CONFIRMACIÓN DE BORRADO */}
-<Dialog open={!!showDeleteConfirm} onOpenChange={v => !v && setShowDeleteConfirm(null)}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>¿Eliminar minuta?</DialogTitle>
-    </DialogHeader>
-    <p>¿Estás seguro que deseas eliminar la minuta "{showDeleteConfirm?.title}"? Esta acción no se puede deshacer.</p>
-    <DialogFooter>
-      <Button variant="outline" onClick={() => setShowDeleteConfirm(null)}>Cancelar</Button>
-      <Button variant="destructive" onClick={handleDeleteConfirm}>Eliminar</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
               })}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* MODAL DE EDICIÓN */}
+      <Dialog open={!!editMinute} onOpenChange={v => !v && setEditMinute(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Minuta</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium">Título</label>
+            <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditMinute(null)}>Cancelar</Button>
+            <Button onClick={handleEditSave}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE CONFIRMACIÓN DE BORRADO */}
+      <Dialog open={!!showDeleteConfirm} onOpenChange={v => !v && setShowDeleteConfirm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar minuta?</DialogTitle>
+          </DialogHeader>
+          <p>¿Estás seguro que deseas eliminar la minuta "{showDeleteConfirm?.title}"? Esta acción no se puede deshacer.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>Eliminar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
