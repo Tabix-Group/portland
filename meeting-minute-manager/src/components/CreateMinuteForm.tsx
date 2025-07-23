@@ -100,7 +100,11 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       .map(t => ({
         ...t,
         assignedTo: t.assignedTo || '',
-        dueDate: t.dueDate || '',
+        dueDate: t.dueDate
+          ? (t.dueDate.length === 10
+              ? new Date(t.dueDate + 'T00:00:00.000Z').toISOString()
+              : new Date(t.dueDate).toISOString())
+          : null,
         completed: !!t.completed,
         mentions: Array.isArray(t.mentions) ? t.mentions : [],
         projectIds: Array.isArray(t.projectIds) ? t.projectIds : [],
@@ -111,7 +115,11 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       .map(t => ({
         ...t,
         assignedTo: t.assignedTo || '',
-        dueDate: t.dueDate || '',
+        dueDate: t.dueDate
+          ? (t.dueDate.length === 10
+              ? new Date(t.dueDate + 'T00:00:00.000Z').toISOString()
+              : new Date(t.dueDate).toISOString())
+          : null,
         completed: !!t.completed,
         mentions: Array.isArray(t.mentions) ? t.mentions : [],
         projectIds: Array.isArray(t.projectIds) ? t.projectIds : [],
