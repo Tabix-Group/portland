@@ -13,30 +13,18 @@ import Settings from '@/components/Settings';
 import { MinuteTemplate } from '@/types';
 
 const AppContent = () => {
-  const { isAuthenticated } = useAuth();
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [selectedMinuteId, setSelectedMinuteId] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<MinuteTemplate | null>(null);
-
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
-
-  const handleCreateMinute = () => {
-    console.log("Creating minute...");
-    setCurrentPage('template-selector');
-  };
-
-  const handleSelectTemplate = (template: MinuteTemplate | null) => {
-    setSelectedTemplate(template);
-    setCurrentPage('create-minute');
-  };
-
-  const handleViewMinute = (id: string) => {
-    console.log(`Viewing minute with ID: ${id}`);
-    setSelectedMinuteId(id);
-    setCurrentPage('view-minute');
-  };
+  // MODO MANTENIMIENTO - para revertir, restaurar el contenido original de este archivo
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">🚧 Mantenimiento 🚧</h1>
+        <p className="text-xl text-gray-600 mb-4">
+          El sistema está en mantenimiento. Por favor, vuelve a intentarlo más tarde.
+        </p>
+      </div>
+    </div>
+  );
+};
 
   const handleBackToDashboard = () => {
     setCurrentPage('dashboard');
