@@ -209,8 +209,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
       .filter(t => t && typeof t.text === 'string' && t.text.trim() !== '')
       .map(t => ({
         ...t,
-        assignedTo: typeof t.assignedTo === 'string' ? t.assignedTo : '',
-        groupId: typeof t.groupId === 'string' ? t.groupId : '',
+        assignedTo: t.assignedTo === 'none' ? '' : (typeof t.assignedTo === 'string' ? t.assignedTo : ''),
+        groupId: t.groupId === 'none' ? '' : (typeof t.groupId === 'string' ? t.groupId : ''),
         completed: !!t.completed
       }));
     try {
@@ -601,8 +601,9 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
             <div className="space-y-2">
               {editTasks.map((task, idx) => {
                 // Normalizar valores para evitar undefined/null
-                const assignedTo = typeof task.assignedTo === 'string' ? task.assignedTo : '';
-                const groupId = typeof task.groupId === 'string' ? task.groupId : '';
+                // Usar 'none' para evitar value="" en SelectItem (Radix error)
+                const assignedTo = typeof task.assignedTo === 'string' && task.assignedTo !== '' ? task.assignedTo : 'none';
+                const groupId = typeof task.groupId === 'string' && task.groupId !== '' ? task.groupId : 'none';
                 return (
                   <div key={task.id || idx} className="flex items-center gap-2">
                     <Input
@@ -619,7 +620,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                       value={assignedTo}
                       onValueChange={v => {
                         const newTasks = [...editTasks];
-                        newTasks[idx] = { ...task, assignedTo: v };
+                        newTasks[idx] = { ...task, assignedTo: v === 'none' ? '' : v };
                         setEditTasks(newTasks);
                       }}
                     >
@@ -627,7 +628,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                         <SelectValue placeholder="Asignado a" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Sin asignar</SelectItem>
+                        <SelectItem value="none">Sin asignar</SelectItem>
                         {users.filter(u => typeof u.id === 'string' && u.id).map(u => (
                           <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                         ))}
@@ -638,7 +639,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                       value={groupId}
                       onValueChange={v => {
                         const newTasks = [...editTasks];
-                        newTasks[idx] = { ...task, groupId: v };
+                        newTasks[idx] = { ...task, groupId: v === 'none' ? '' : v };
                         setEditTasks(newTasks);
                       }}
                     >
@@ -646,7 +647,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                         <SelectValue placeholder="Agrupador" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Sin agrupador</SelectItem>
+                        <SelectItem value="none">Sin agrupador</SelectItem>
                         {allTopicGroups.filter(group => typeof group.id === 'string' && group.id).map(group => (
                           <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
                         ))}
@@ -658,7 +659,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
               })}
               <Button size="sm" variant="outline" onClick={() => setEditTasks([
                 ...editTasks,
-                { text: '', assignedTo: '', completed: false, groupId: '' }
+                { text: '', assignedTo: 'none', completed: false, groupId: 'none' }
               ])}>Agregar tarea</Button>
             </div>
             <label className="block text-sm font-medium">Título</label>
