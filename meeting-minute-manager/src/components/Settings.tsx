@@ -362,7 +362,7 @@ const Settings: React.FC = () => {
                       <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => deleteProject(project.id)}>
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
