@@ -133,14 +133,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
             />
           </div>
           
-          {/* Activity Timeline */}
-          <div>
-            <ActivityTimeline 
-              minutes={Array.isArray(userMinutes) ? userMinutes : []} 
-              users={Array.isArray(users) ? users : []} 
-              currentUserId={user?.id || ''}
-            />
-          </div>
+          {/* Activity Timeline removido */}
         </div>
       </div>
     </div>
