@@ -90,6 +90,7 @@ model Task {
   userId     String?
   minute     Minute?  @relation(fields: [minuteId], references: [id])
   minuteId   String?
+  groupId    String?  // Permite asociar la tarea a un agrupador de temas
 }
 
 model FileAttachment {
