@@ -82,12 +82,6 @@ const LoginForm = () => {
               {isLoading ? 'Accediendo...' : 'Acceder'}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-gray-600 space-y-1">
-            <p><strong>Usuarios de prueba:</strong></p>
-            <p>Admin: admin@portland.com / 123456</p>
-            <p>Usuario: juan@portland.com / 123456</p>
-            <p>Usuario: maria@portland.com / 123456</p>
-          </div>
         </CardContent>
       </Card>
     </div>
