@@ -179,6 +179,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // MINUTES CRUD
   // Devuelve el minuto creado (con id)
+
+  // Add minute and create tasks in SQL in one request
   const addMinute = async (minute: Omit<Minute, "id">) => {
     try {
       // Ensure all arrays are properly initialized
@@ -197,24 +199,57 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         participantIds: safeArray(minute.participantIds),
         externalMentions: safeArray(minute.externalMentions),
         createdBy: user?.id || "",
-      }
+        tasks: Array.isArray((minute as any).tasks) ? (minute as any).tasks : [],
+      };
 
-      const created = await api.createMinute(safeMinute)
-      setMinutes((prev) => [...safeArray<Minute>(prev), normalizeMinute(created)])
+      const created = await api.createMinute(safeMinute);
+      setMinutes((prev) => [...safeArray<Minute>(prev), normalizeMinute(created)]);
+      // Refrescar tareas para la nueva minuta
+      try {
+        const tasks = await api.getTasksByMinute(created.id);
+        setMinuteTasks((prev) => ({ ...prev, [created.id]: safeArray(tasks) }));
+      } catch (e) {
+        setMinuteTasks((prev) => ({ ...prev, [created.id]: [] }));
+      }
       return created;
     } catch (error) {
-      console.error("Error adding minute:", error)
-      throw error
+      console.error("Error adding minute:", error);
+      throw error;
     }
-  }
+  } 
 
+  // Update minute and sync tasks in SQL in one request
   const updateMinute = async (id: string, updates: Partial<Minute>) => {
     try {
-      const updated = await api.updateMinute(id, updates)
-      setMinutes((prev) => safeArray<Minute>(prev).map((m) => (m.id === id ? normalizeMinute(updated) : m)))
+      // Ensure all arrays are properly initialized
+      const safeUpdates = {
+        ...updates,
+        topicGroups: safeArray(updates.topicGroups),
+        topicsDiscussed: safeArray(updates.topicsDiscussed),
+        decisions: safeArray(updates.decisions),
+        pendingTasks: safeArray(updates.pendingTasks),
+        participants: safeArray(updates.participants),
+        occasionalParticipants: safeArray(updates.occasionalParticipants),
+        informedPersons: safeArray(updates.informedPersons),
+        tags: safeArray(updates.tags),
+        files: safeArray(updates.files),
+        projectIds: safeArray(updates.projectIds),
+        participantIds: safeArray(updates.participantIds),
+        externalMentions: safeArray(updates.externalMentions),
+        tasks: Array.isArray((updates as any).tasks) ? (updates as any).tasks : [],
+      };
+      const updated = await api.updateMinute(id, safeUpdates);
+      setMinutes((prev) => safeArray<Minute>(prev).map((m) => (m.id === id ? normalizeMinute(updated) : m)));
+      // Refrescar tareas para la minuta actualizada
+      try {
+        const tasks = await api.getTasksByMinute(id);
+        setMinuteTasks((prev) => ({ ...prev, [id]: safeArray(tasks) }));
+      } catch (e) {
+        setMinuteTasks((prev) => ({ ...prev, [id]: [] }));
+      }
     } catch (error) {
-      console.error("Error updating minute:", error)
-      throw error
+      console.error("Error updating minute:", error);
+      throw error;
     }
   }
 

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useData } from '@/contexts/DataContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,15 +19,7 @@ const PREDEFINED_COLORS = [
   '#6b7280', // gray
 ];
 
-const STANDARD_TAGS: Tag[] = [
-  { id: 'strategy', name: 'Estrategia', color: '#3b82f6' },
-  { id: 'budget', name: 'Presupuesto', color: '#22c55e' },
-  { id: 'urgent', name: 'Urgente', color: '#ef4444' },
-  { id: 'hr', name: 'Recursos Humanos', color: '#8b5cf6' },
-  { id: 'marketing', name: 'Marketing', color: '#f97316' },
-  { id: 'kickoff', name: 'Kickoff', color: '#ec4899' },
-  { id: 'followup', name: 'Seguimiento', color: '#6b7280' },
-];
+
 
 interface TagSelectorProps {
   selectedTags: Tag[];
@@ -37,6 +30,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   selectedTags,
   onTagsChange
 }) => {
+  const { tags } = useData();
   const [newTagName, setNewTagName] = useState('');
   const [selectedColor, setSelectedColor] = useState(PREDEFINED_COLORS[0]);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -68,11 +62,11 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     <div className="space-y-4">
       <Label>Etiquetas</Label>
       
-      {/* Etiquetas estándar */}
+      {/* Etiquetas del sistema */}
       <div className="space-y-2">
-        <Label className="text-sm text-gray-600">Etiquetas estándar:</Label>
+        <Label className="text-sm text-gray-600">Etiquetas del sistema:</Label>
         <div className="flex flex-wrap gap-2">
-          {(Array.isArray(STANDARD_TAGS) ? STANDARD_TAGS : []).map((tag) => (
+          {(Array.isArray(tags) ? tags : []).map((tag) => (
             <Button
               key={tag.id}
               type="button"
