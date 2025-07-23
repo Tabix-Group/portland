@@ -202,13 +202,31 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
     const newTitle = editTitleRef.current?.value || editMinute.title;
     try {
       await updateMinute(editMinute.id, {
+        // Campos requeridos del modelo Minute
+        number: editMinute.number,
         title: newTitle,
-        status: editStatus as 'draft' | 'published',
         meetingDate: editDate,
-        projectIds: editProjectIds,
-        tagIds: editTagIds,
-        topicGroupIds: editTopicGroupIds,
+        meetingTime: editMinute.meetingTime || '',
+        nextMeetingDate: editMinute.nextMeetingDate || '',
+        nextMeetingTime: editMinute.nextMeetingTime || '',
+        nextMeetingNotes: editMinute.nextMeetingNotes || '',
         participantIds: editParticipantIds,
+        participants: editMinute.participants || [],
+        occasionalParticipants: editMinute.occasionalParticipants || [],
+        informedPersons: editMinute.informedPersons || [],
+        topicGroups: editMinute.topicGroups || [],
+        topicsDiscussed: editMinute.topicsDiscussed || [],
+        decisions: editMinute.decisions || [],
+        pendingTasks: editMinute.pendingTasks || [],
+        internalNotes: editMinute.internalNotes || '',
+        tags: editMinute.tags || [],
+        files: editMinute.files || [],
+        status: editStatus as 'draft' | 'published',
+        createdBy: editMinute.createdBy || '',
+        createdAt: editMinute.createdAt || new Date().toISOString(),
+        projectIds: editProjectIds,
+        externalMentions: editMinute.externalMentions || [],
+        // Si tienes tagIds y topicGroupIds como campos separados en backend, puedes agregarlos aquí
       });
       toast({ title: 'Minuta actualizada', description: 'La minuta fue actualizada correctamente.' });
       setEditMinute(null);

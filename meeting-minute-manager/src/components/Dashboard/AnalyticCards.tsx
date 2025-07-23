@@ -202,7 +202,7 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
         </CardContent>
       </Card>
 
-      {/* Tareas pendientes */}
+      {/* Tareas pendientes (incluye root y topicGroups) */}
       <Card className="h-fit">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center space-x-2 text-base">
@@ -213,11 +213,14 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
         <CardContent className="pt-0">
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {minutes
-              .filter(minute => minute.pendingTasks.some(task => !task.completed))
-              .slice(0, 5)
               .map(minute => {
-                const pendingTasks = minute.pendingTasks.filter(task => !task.completed);
-                // Mostrar para cada tarea pendiente el/los asignados
+                // Combina tareas pendientes root y de topicGroups
+                const rootPending = Array.isArray(minute.pendingTasks) ? minute.pendingTasks.filter(task => !task.completed) : [];
+                const groupPending = Array.isArray(minute.topicGroups)
+                  ? minute.topicGroups.flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks.filter(task => !task.completed) : [])
+                  : [];
+                const allPending = [...rootPending, ...groupPending];
+                if (allPending.length === 0) return null;
                 return (
                   <div key={minute.id} className="flex justify-between items-center p-2 bg-orange-50 rounded-lg">
                     <div className="flex-1 min-w-0">
@@ -225,7 +228,7 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
                       <p className="text-xs text-gray-600">
                         {new Date(minute.meetingDate).toLocaleDateString()}
                       </p>
-                      {pendingTasks.map((task, idx) => {
+                      {allPending.map((task, idx) => {
                         const assignedUser = users.find(u => u.id === task.assignedTo);
                         return (
                           <div key={task.id} className="flex items-center text-xs text-orange-900 mt-1">
@@ -241,12 +244,20 @@ const AnalyticCards: React.FC<AnalyticCardsProps> = ({ minutes, users }) => {
                       })}
                     </div>
                     <div className="text-orange-600 font-bold text-sm ml-2">
-                      {pendingTasks.length}
+                      {allPending.length}
                     </div>
                   </div>
                 );
-              })}
-            {minutes.filter(minute => minute.pendingTasks.some(task => !task.completed)).length === 0 && (
+              })
+              .filter(Boolean)
+              .slice(0, 5)}
+            {minutes.every(minute => {
+              const rootPending = Array.isArray(minute.pendingTasks) ? minute.pendingTasks.filter(task => !task.completed) : [];
+              const groupPending = Array.isArray(minute.topicGroups)
+                ? minute.topicGroups.flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks.filter(task => !task.completed) : [])
+                : [];
+              return rootPending.length === 0 && groupPending.length === 0;
+            }) && (
               <div className="text-center py-4 text-gray-500 text-sm">
                 No hay tareas pendientes
               </div>
