@@ -284,18 +284,20 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                     </div>
                     <div className="space-y-2">
                       {(Array.isArray(group.topicsDiscussed) ? group.topicsDiscussed : []).map((topic) => (
-                        <div key={topic.id} className="flex gap-2">
-                          <MentionTextInput
-                            value={topic.text}
-                            onChange={(text, mentions, projectIds) => 
-                              updateSectionItem(group.id, 'topicsDiscussed', topic.id, { text, mentions, projectIds })
-                            }
-                            users={users}
-                            projects={projects}
-                            mentions={topic.mentions || []}
-                            projectIds={topic.projectIds || []}
-                            placeholder="Describe el tema tratado..."
-                          />
+                        <div key={topic.id} className="flex gap-2 items-center">
+                          <div className="flex-grow">
+                            <MentionTextInput
+                              value={topic.text}
+                              onChange={(text, mentions, projectIds) => 
+                                updateSectionItem(group.id, 'topicsDiscussed', topic.id, { text, mentions, projectIds })
+                              }
+                              users={users}
+                              projects={projects}
+                              mentions={topic.mentions || []}
+                              projectIds={topic.projectIds || []}
+                              placeholder="Describe el tema tratado..."
+                            />
+                          </div>
                           <Button
                             type="button"
                             variant="ghost"
@@ -327,18 +329,20 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                     </div>
                     <div className="space-y-2">
                       {(Array.isArray(group.decisions) ? group.decisions : []).map((decision) => (
-                        <div key={decision.id} className="flex gap-2">
-                          <MentionTextInput
-                            value={decision.text}
-                            onChange={(text, mentions, projectIds) => 
-                              updateSectionItem(group.id, 'decisions', decision.id, { text, mentions, projectIds })
-                            }
-                            users={users}
-                            projects={projects}
-                            mentions={decision.mentions || []}
-                            projectIds={decision.projectIds || []}
-                            placeholder="Describe la decisión tomada..."
-                          />
+                        <div key={decision.id} className="flex gap-2 items-center">
+                          <div className="flex-grow">
+                            <MentionTextInput
+                              value={decision.text}
+                              onChange={(text, mentions, projectIds) => 
+                                updateSectionItem(group.id, 'decisions', decision.id, { text, mentions, projectIds })
+                              }
+                              users={users}
+                              projects={projects}
+                              mentions={decision.mentions || []}
+                              projectIds={decision.projectIds || []}
+                              placeholder="Describe la decisión tomada..."
+                            />
+                          </div>
                           <Button
                             type="button"
                             variant="ghost"
@@ -371,18 +375,20 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                     <div className="space-y-3">
                       {(Array.isArray(group.pendingTasks) ? group.pendingTasks : []).map((task) => (
                         <div key={task.id} className="space-y-2 p-3 border rounded bg-gray-50">
-                          <div className="flex gap-2">
-                            <MentionTextInput
-                              value={task.text}
-                              onChange={(text, mentions, projectIds) => 
-                                updateSectionItem(group.id, 'pendingTasks', task.id, { text, mentions, projectIds })
-                              }
-                              users={users}
-                              projects={projects}
-                              mentions={task.mentions || []}
-                              projectIds={task.projectIds || []}
-                              placeholder="Describe la tarea..."
-                            />
+                          <div className="flex gap-2 items-center">
+                            <div className="flex-grow">
+                              <MentionTextInput
+                                value={task.text}
+                                onChange={(text, mentions, projectIds) => 
+                                  updateSectionItem(group.id, 'pendingTasks', task.id, { text, mentions, projectIds })
+                                }
+                                users={users}
+                                projects={projects}
+                                mentions={task.mentions || []}
+                                projectIds={task.projectIds || []}
+                                placeholder="Describe la tarea..."
+                              />
+                            </div>
                             <Button
                               type="button"
                               variant="ghost"
