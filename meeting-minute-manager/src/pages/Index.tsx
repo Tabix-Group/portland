@@ -21,7 +21,6 @@ const AppContent = () => {
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-md text-center border border-yellow-400">
         <h1 className="text-2xl font-bold text-yellow-600 mb-4">Sitio en Mantenimiento</h1>
         <p className="text-gray-700 mb-4">Estamos realizando tareas de mantenimiento.<br />Por favor, vuelve a intentarlo más tarde.</p>
-        <span className="inline-block text-xs text-gray-400">(Este mensaje es reversible desde <code>Index.tsx</code>)</span>
       </div>
     </div>
   );
