@@ -43,6 +43,7 @@ const Settings: React.FC = () => {
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState<'admin' | 'user'>('user');
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
@@ -60,10 +61,11 @@ const Settings: React.FC = () => {
   // ...existing code...
 
   const handleAddUser = () => {
-    if (newUserName && newUserEmail) {
+    if (newUserName && newUserEmail && newUserPassword) {
       addUser({
         name: newUserName,
         email: newUserEmail,
+        password: newUserPassword,
         role: newUserRole,
         isActive: true,
         projectIds: [],
@@ -71,6 +73,7 @@ const Settings: React.FC = () => {
       });
       setNewUserName('');
       setNewUserEmail('');
+      setNewUserPassword('');
     }
   };
 
@@ -172,6 +175,16 @@ const Settings: React.FC = () => {
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
                   placeholder="Email del usuario"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  placeholder="Contraseña del usuario"
                 />
               </div>
               <div>
