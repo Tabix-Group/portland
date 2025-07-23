@@ -12,31 +12,17 @@ import MinuteView from '@/components/MinuteView';
 import Settings from '@/components/Settings';
 import { MinuteTemplate } from '@/types';
 
-const AppContent = () => {
-  // MODO MANTENIMIENTO - para revertir, restaurar el contenido original de este archivo
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">🚧 Mantenimiento 🚧</h1>
-        <p className="text-xl text-gray-600 mb-4">
-          El sistema está en mantenimiento. Por favor, vuelve a intentarlo más tarde.
-        </p>
-      </div>
+
+const AppContent = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold mb-4">🚧 Mantenimiento 🚧</h1>
+      <p className="text-xl text-gray-600 mb-4">
+        El sistema está en mantenimiento. Por favor, vuelve a intentarlo más tarde.
+      </p>
     </div>
-  );
-};
-
-  const handleBackToDashboard = () => {
-    setCurrentPage('dashboard');
-    setSelectedMinuteId(null);
-    setSelectedTemplate(null);
-  };
-
-  const handleBackToMinutes = () => {
-    setCurrentPage('minutes');
-    setSelectedMinuteId(null);
-    setSelectedTemplate(null);
-  };
+  </div>
+);
 
   const renderContent = () => {
     switch (currentPage) {
