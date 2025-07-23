@@ -204,6 +204,15 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const handleEditSave = async () => {
     if (!editMinute) return;
     const newTitle = editTitleRef.current?.value || editMinute.title;
+    // Limpiar y validar tareas antes de enviar
+    const cleanedTasks = editTasks
+      .filter(t => t && typeof t.text === 'string' && t.text.trim() !== '')
+      .map(t => ({
+        ...t,
+        assignedTo: typeof t.assignedTo === 'string' ? t.assignedTo : '',
+        groupId: typeof t.groupId === 'string' ? t.groupId : '',
+        completed: !!t.completed
+      }));
     try {
       await updateMinute(editMinute.id, {
         number: editMinute.number,
@@ -228,8 +237,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         createdAt: editMinute.createdAt || new Date().toISOString(),
         projectIds: editProjectIds,
         externalMentions: editMinute.externalMentions || [],
-        // Enviar tareas reales (SQL) al backend
-        tasks: editTasks,
+        // Enviar tareas limpias (SQL) al backend
+        tasks: cleanedTasks,
       });
       toast({ title: 'Minuta actualizada', description: 'La minuta fue actualizada correctamente.' });
       setEditMinute(null);
@@ -619,7 +628,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Sin asignar</SelectItem>
-                        {users.map(u => (
+                        {users.filter(u => typeof u.id === 'string' && u.id).map(u => (
                           <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                         ))}
                       </SelectContent>
@@ -638,7 +647,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">Sin agrupador</SelectItem>
-                        {allTopicGroups.map(group => (
+                        {allTopicGroups.filter(group => typeof group.id === 'string' && group.id).map(group => (
                           <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
                         ))}
                       </SelectContent>
