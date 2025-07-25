@@ -13,21 +13,7 @@ import Settings from '@/components/Settings';
 import { MinuteTemplate } from '@/types';
 
 
-// MODO MANTENIMIENTO: para desactivar, comentar el return y descomentar el resto del componente
 const AppContent = () => {
-  // --- INICIO BLOQUEO POR MANTENIMIENTO ---
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md text-center border border-yellow-400">
-        <h1 className="text-2xl font-bold text-yellow-600 mb-4">Sitio en Mantenimiento</h1>
-        <p className="text-gray-700 mb-4">Estamos realizando tareas de mantenimiento.<br />Por favor, vuelve a intentarlo más tarde.</p>
-      </div>
-    </div>
-  );
-  // --- FIN BLOQUEO POR MANTENIMIENTO ---
-
-  /*
-  // ...existing code...
   const { isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedMinuteId, setSelectedMinuteId] = useState<string | null>(null);
@@ -37,9 +23,95 @@ const AppContent = () => {
     return <LoginForm />;
   }
 
-  // ...existing code...
-  // (Resto del componente original aquí)
-  */
+  const handleCreateMinute = () => {
+    console.log("Creating minute...");
+    setCurrentPage('template-selector');
+  };
+
+  const handleSelectTemplate = (template: MinuteTemplate | null) => {
+    setSelectedTemplate(template);
+    setCurrentPage('create-minute');
+  };
+
+  const handleViewMinute = (id: string) => {
+    console.log(`Viewing minute with ID: ${id}`);
+    setSelectedMinuteId(id);
+    setCurrentPage('view-minute');
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentPage('dashboard');
+    setSelectedMinuteId(null);
+    setSelectedTemplate(null);
+  };
+
+  const handleBackToMinutes = () => {
+    setCurrentPage('minutes');
+    setSelectedMinuteId(null);
+    setSelectedTemplate(null);
+  };
+
+  const renderContent = () => {
+    switch (currentPage) {
+      case 'minutes':
+        return (
+          <MinutesPage 
+            onCreateMinute={handleCreateMinute}
+            onViewMinute={handleViewMinute}
+          />
+        );
+      case 'template-selector':
+        return (
+          <TemplateSelector
+            onBack={() => setCurrentPage('dashboard')}
+            onSelectTemplate={handleSelectTemplate}
+          />
+        );
+      case 'create-minute':
+        return (
+          <CreateMinuteForm 
+            onBack={() => setCurrentPage('template-selector')}
+            onSuccess={handleBackToDashboard}
+            selectedTemplate={selectedTemplate}
+          />
+        );
+      case 'view-minute':
+        if (selectedMinuteId) {
+          return (
+            <MinuteView
+              minuteId={selectedMinuteId}
+              onBack={handleBackToDashboard}
+            />
+          );
+        }
+        return (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Minuta no encontrada</p>
+            <button 
+              onClick={handleBackToDashboard}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Volver al Dashboard
+            </button>
+          </div>
+        );
+      case 'settings':
+        return <Settings />;
+      default:
+        return (
+          <Dashboard 
+            onCreateMinute={handleCreateMinute}
+            onViewMinute={handleViewMinute}
+          />
+        );
+    }
+  };
+
+  return (
+    <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
+      {renderContent()}
+    </Layout>
+  );
 };
 
 const Index = () => {
