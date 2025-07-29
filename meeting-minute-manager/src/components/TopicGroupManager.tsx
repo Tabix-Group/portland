@@ -104,6 +104,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
         mentions: [],
         projectIds: []
       };
+      newItem.groupId = groupId; // <-- Asignar groupId
     } else {
       newItem = {
         id: `${section}-${Date.now()}`,
@@ -283,7 +284,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                       </Button>
                     </div>
                     <div className="space-y-2">
-                      {(Array.isArray(group.topicsDiscussed) ? group.topicsDiscussed : []).map((topic) => (
+                      {(Array.isArray(group.topicsDiscussed) ? group.topicsDiscussed : []).map((topic, idx, arr) => (
                         <div key={topic.id} className="flex gap-2 items-center">
                           <div className="flex-grow">
                             <MentionTextInput
@@ -296,6 +297,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                               mentions={topic.mentions || []}
                               projectIds={topic.projectIds || []}
                               placeholder="Describe el tema tratado..."
+                              autoFocus={idx === arr.length - 1 && topic.text === ''}
                               onKeyPress={e => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                   e.preventDefault();
@@ -336,7 +338,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                       </Button>
                     </div>
                     <div className="space-y-2">
-                      {(Array.isArray(group.decisions) ? group.decisions : []).map((decision) => (
+                      {(Array.isArray(group.decisions) ? group.decisions : []).map((decision, idx, arr) => (
                         <div key={decision.id} className="flex gap-2 items-center">
                           <div className="flex-grow">
                             <MentionTextInput
@@ -349,6 +351,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
                               mentions={decision.mentions || []}
                               projectIds={decision.projectIds || []}
                               placeholder="Describe la decisión tomada..."
+                              autoFocus={idx === arr.length - 1 && decision.text === ''}
                               onKeyPress={e => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                   e.preventDefault();

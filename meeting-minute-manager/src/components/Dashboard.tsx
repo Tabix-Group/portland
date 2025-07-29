@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Modal from '@/components/ui/Modal';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
@@ -19,6 +20,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
   const { user } = useAuth();
   const { minutes, projects, users, getTasksForMinute } = useData();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showTasksModal, setShowTasksModal] = useState(false);
 
   // Filter projects based on user access
   const userProjects = useMemo(() => {
@@ -135,11 +137,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
           {/* Tareas pendientes (solo tareas reales de SQL) */}
           <div>
             <Card className="h-fit">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center space-x-2 text-base">
+             <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <div className="flex items-center space-x-2 text-base">
                   <Clock className="h-4 w-4 text-orange-600" />
                   <span>Tareas Pendientes</span>
-                </CardTitle>
+                </div>
+                <button
+                  className="text-xs text-orange-700 underline hover:text-orange-900"
+                  onClick={() => setShowTasksModal(true)}
+                >
+                  Ver detalle
+                </button>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -191,6 +199,43 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
           </div>
         </div>
       </div>
+      {/* Modal para detalle de tareas */}
+      {typeof window !== 'undefined' && (
+        <Modal open={showTasksModal} onClose={() => setShowTasksModal(false)}>
+          <h2 className="text-xl font-bold mb-4">Detalle de Tareas Pendientes</h2>
+          <div className="max-h-[60vh] overflow-auto space-y-4">
+            {userMinutes
+              .map(minute => {
+                const realTasks = getTasksForMinute(minute.id).filter(task => !task.completed);
+                if (realTasks.length === 0) return null;
+                return (
+                  <div key={minute.id} className="border-b pb-2 mb-2">
+                    <div className="font-semibold text-base mb-1">{minute.title} <span className="text-xs text-gray-500">({new Date(minute.meetingDate).toLocaleDateString()})</span></div>
+                    {realTasks.map((task, idx) => {
+                      const assignedUser = users.find(u => u.id === task.assignedTo);
+                      return (
+                        <div key={task.id} className="mb-2 text-sm">
+                          <div><b>Tarea:</b> {task.text}</div>
+                          {assignedUser && <div><b>Responsable:</b> {assignedUser.name}</div>}
+                          {task.dueDate && <div><b>Vence:</b> {new Date(task.dueDate).toLocaleDateString()}</div>}
+                          {/* Si Task tiene descripción, descomentar la línea siguiente */}
+                          {/* {task.description && <div><b>Descripción:</b> {task.description}</div>} */}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })
+              .filter(Boolean)
+            }
+            {userMinutes.every(minute => getTasksForMinute(minute.id).filter(task => !task.completed).length === 0) && (
+              <div className="text-center py-4 text-gray-500 text-sm">
+                No hay tareas pendientes
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

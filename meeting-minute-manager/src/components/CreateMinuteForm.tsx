@@ -95,7 +95,10 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
     // Limpiar y validar tareas de topicGroups y de pendingTasks raíz
     const groupTasks = (Array.isArray(formData.topicGroups) ? formData.topicGroups : [])
-      .flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks : [])
+      .flatMap(g => Array.isArray(g.pendingTasks) ? g.pendingTasks.map(t => ({
+        ...t,
+        groupId: g.id // Forzar groupId explícito
+      })) : [])
       .filter(t => t.text && t.text.trim() !== '')
       .map(t => ({
         ...t,
@@ -108,7 +111,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
         completed: !!t.completed,
         mentions: Array.isArray(t.mentions) ? t.mentions : [],
         projectIds: Array.isArray(t.projectIds) ? t.projectIds : [],
-        ...(t.groupId ? { groupId: t.groupId } : {}),
+        groupId: t.groupId // Siempre presente
       }));
     const rootTasks = (Array.isArray(formData.pendingTasks) ? formData.pendingTasks : [])
       .filter(t => t.text && t.text.trim() !== '')

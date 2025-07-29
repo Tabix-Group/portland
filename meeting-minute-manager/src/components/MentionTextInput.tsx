@@ -14,6 +14,8 @@ interface MentionTextInputProps {
   mentions: string[];
   projectIds?: string[];
   onKeyPress?: (e: React.KeyboardEvent) => void;
+  autoFocus?: boolean;
+  onBlur?: () => void;
 }
 
 const MentionTextInput: React.FC<MentionTextInputProps> = ({
@@ -24,7 +26,9 @@ const MentionTextInput: React.FC<MentionTextInputProps> = ({
   projects,
   mentions,
   projectIds = [],
-  onKeyPress
+  onKeyPress,
+  autoFocus = false,
+  onBlur
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<{type: 'user' | 'project', id: string, name: string}>>([]);
@@ -147,6 +151,13 @@ const MentionTextInput: React.FC<MentionTextInputProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (autoFocus && inputRef.current && value === '') {
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(0, 0);
+    }
+  }, [autoFocus, value]);
+
   return (
     <div className="space-y-2 w-full min-w-[400px]">
       <div className="relative">
@@ -157,8 +168,9 @@ const MentionTextInput: React.FC<MentionTextInputProps> = ({
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
           className="w-full min-w-[400px]"
+          autoFocus={autoFocus}
+          onBlur={onBlur}
         />
-        
         {showSuggestions && (
           <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
             {suggestions.map((suggestion, index) => (
