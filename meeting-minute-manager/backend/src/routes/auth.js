@@ -3,6 +3,7 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -18,9 +19,10 @@ router.post('/login', async (req, res) => {
   if (!valid) {
     return res.status(401).json({ error: 'Credenciales incorrectas' });
   }
-  // No enviar password al frontend
+  // Generar JWT
+  const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
   const { password: _, ...userSafe } = user;
-  res.json(userSafe);
+  res.json({ user: userSafe, token });
 });
 
 module.exports = router;
