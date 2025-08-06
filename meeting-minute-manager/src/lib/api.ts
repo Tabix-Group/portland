@@ -5,9 +5,17 @@ export const getTasksByMinute = (minuteId: string) => request(`/minutes/${minute
 export const BASE_URL = "https://portland-be-production.up.railway.app/api"; // URL real del backend en Railway
 
 async function request(path: string, options: RequestInit = {}) {
+  // Obtener el token JWT del localStorage (o de contexto si lo prefieres)
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  // Permitir que options.headers sobrescriba si es necesario
+  const mergedHeaders = { ...headers, ...(options.headers || {}) };
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers: mergedHeaders,
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
