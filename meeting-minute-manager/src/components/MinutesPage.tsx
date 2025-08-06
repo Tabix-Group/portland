@@ -90,22 +90,11 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   }, [projects, user])
 
   // Filter minutes based on user permissions and project access, sorted by date (newest first)
+  // All users can view all minutes; backend controla edición/borrado
   const userMinutes = useMemo(() => {
     return safeArray(minutes)
-      .filter((minute) => {
-        // Admin can see all minutes
-        if (user?.role === "admin") return true
-
-        // Users with limited access can only see minutes from their assigned projects
-        if (user?.hasLimitedAccess && safeArray(minute.projectIds).length > 0) {
-          return safeArray(minute.projectIds).some((projectId) => safeArray(user.projectIds).includes(projectId))
-        }
-
-        // Regular users can see minutes they participate in
-        return safeArray(minute.participantIds).includes(user?.id || "")
-      })
       .sort((a, b) => new Date(b.meetingDate).getTime() - new Date(a.meetingDate).getTime())
-  }, [minutes, user])
+  }, [minutes])
 
   // Filter and search minutes
   const filteredMinutes = useMemo(() => {

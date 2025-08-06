@@ -72,9 +72,8 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     }
   }, [formData.topicGroups]);
 
-  const userProjects = user?.role === 'admin' 
-    ? projects 
-    : projects.filter(p => user?.projectIds.includes(p.id));
+  // Todos los usuarios pueden ver todos los proyectos al crear minuta
+  const userProjects = projects;
 
   const availableUsers = users.filter(u => u.isActive);
 
