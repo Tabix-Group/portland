@@ -23,7 +23,9 @@ router.post('/', async (req, res) => {
     if (!name || !email || !password || !role) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
-    if (!['ADMIN', 'USER'].includes(role)) {
+    // Aceptar roles en lowercase o uppercase
+    const upperRole = role.toUpperCase();
+    if (!['ADMIN', 'USER'].includes(upperRole)) {
       return res.status(400).json({ error: 'Rol inválido' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,7 +34,7 @@ router.post('/', async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role,
+        role: upperRole,
         isActive: isActive !== undefined ? isActive : true,
         projectIds: projectIds || [],
         hasLimitedAccess: hasLimitedAccess || false
@@ -48,10 +50,16 @@ router.post('/', async (req, res) => {
 // PUT update user
 router.put('/:id', async (req, res) => {
   const { role, ...rest } = req.body;
-  if (role && !['ADMIN', 'USER'].includes(role)) {
-    return res.status(400).json({ error: 'Rol inválido' });
+  // Aceptar roles en lowercase o uppercase
+  let updateRole;
+  if (role) {
+    const upper = role.toUpperCase();
+    if (!['ADMIN', 'USER'].includes(upper)) {
+      return res.status(400).json({ error: 'Rol inválido' });
+    }
+    updateRole = upper;
   }
-  const user = await prisma.user.update({ where: { id: req.params.id }, data: { ...rest, ...(role ? { role } : {}) } });
+  const user = await prisma.user.update({ where: { id: req.params.id }, data: { ...rest, ...(updateRole ? { role: updateRole } : {}) } });
   res.json(user);
 });
 
