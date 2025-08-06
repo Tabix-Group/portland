@@ -14,18 +14,21 @@ model Minute {
   topicGroups Json
   topicsDiscussed Json
   decisions Json
-  pendingTasks Json // legacy, no usar para nuevas tareas
+  pendingTasks Json // LEGACY: no usar para nuevas tareas
   tasks     Task[]
   internalNotes String?
   tags Json
   files Json
   status String
-  createdBy   User?   @relation("MinuteCreatedBy", fields: [createdById], references: [id])
-  createdById String?
+  createdBy   User   @relation("MinuteCreatedBy", fields: [createdById], references: [id])
+  createdById String
   createdAt DateTime @default(now())
   projectIds String[]
   externalMentions  String[]
 }
+// NOTA: MinuteItem es para detalles de minutas, Minute es el modelo principal de minutas.
+// Revisa que el backend y frontend usen el modelo correcto para CRUD y permisos.
+//
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
