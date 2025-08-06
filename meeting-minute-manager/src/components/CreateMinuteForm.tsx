@@ -425,8 +425,11 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
           <Button type="button" variant="outline" onClick={onBack}>
             Cancelar
           </Button>
-          <Button type="submit">
-            Crear Minuta #{nextMinuteNumber}
+          <Button type="submit" value="draft">
+            Guardar borrador
+          </Button>
+          <Button type="submit" value="published">
+            Publicar
           </Button>
         </div>
       </form>
