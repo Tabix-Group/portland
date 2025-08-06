@@ -4,6 +4,7 @@ import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
 import * as api from "../lib/api"
 import type { User, Project, Minute, MinuteTemplate, AuthUser, Tag, GlobalTopicGroup } from "@/types"
+import { useAuth } from '@/contexts/AuthContext';
 
 import type { Task } from "@/types"
 
@@ -116,7 +117,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return norm
   }
 
+  const { isAuthenticated } = useAuth();
+  // Cargar datos solo cuando el usuario esté autenticado
   useEffect(() => {
+    if (!isAuthenticated) return;
     const loadData = async () => {
       try {
         const [usersData, projectsData, minutesData, templatesData, tagsData, topicGroupsData] = await Promise.all([
@@ -163,7 +167,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     loadData()
-  }, [])
+  }, [isAuthenticated])
   // Helper to get tasks for a minute
   const getTasksForMinute = (minuteId: string) => {
     return minuteTasks[minuteId] || []
