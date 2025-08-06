@@ -32,24 +32,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onCreateMinute, onViewMinute, onC
     return projects.filter(project => user.projectIds.includes(project.id));
   }, [projects, user]);
 
-  // Filter minutes based on user permissions and project access
+  // Todos los usuarios ven todas las minutas para las gráficas y tareas
   const userMinutes = useMemo(() => {
     if (!Array.isArray(minutes)) return [];
-    return minutes.filter(minute => {
-      // Admin can see all minutes
-      if (user?.role === 'admin') return true;
-      
-      // Users with limited access can only see minutes from their assigned projects
-      if (user?.hasLimitedAccess && Array.isArray(minute.projectIds) && minute.projectIds.length > 0) {
-        if (!Array.isArray(user?.projectIds)) return false;
-        return minute.projectIds.some(projectId => user.projectIds.includes(projectId));
-      }
-      
-      // Regular users can see minutes they participate in
-      if (!Array.isArray(minute.participantIds)) return false;
-      return minute.participantIds.includes(user?.id || '');
-    });
-  }, [minutes, user]);
+    return minutes;
+  }, [minutes]);
 
   // Calculate stats
   const stats = useMemo(() => {

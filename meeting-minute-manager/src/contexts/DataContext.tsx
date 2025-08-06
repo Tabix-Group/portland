@@ -114,6 +114,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     norm.projectIds = safe(norm.projectIds)
     norm.participantIds = safe(norm.participantIds)
     norm.externalMentions = safe(norm.externalMentions)
+    // Ensure createdBy field matches Prisma's createdById for frontend
+    norm.createdBy = (minute.createdById as string) || ''
     return norm
   }
 

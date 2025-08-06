@@ -19,6 +19,8 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
   const { minutes, users, projects, getTasksForMinute } = useData();
 
   const minute = minutes.find(m => m.id === minuteId);
+  // Información de creador
+  const creator = users.find(u => u.id === minute?.createdBy);
 
   if (!minute) {
     return (
@@ -99,6 +101,12 @@ const MinuteView: React.FC<MinuteViewProps> = ({ minuteId, onBack }) => {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Información de creación */}
+          <div className="mb-4">
+            <h4 className="font-medium">Información de Creación</h4>
+            <p>Creado por: {creator?.name || minute?.createdBy}</p>
+            <p>Fecha de creación: {minute?.createdAt && new Date(minute.createdAt).toLocaleString()}</p>
+          </div>
           {/* Proyectos relacionados */}
           {Array.isArray(minute.projectIds) && minute.projectIds.length > 0 && (
             <div className="mb-4">
