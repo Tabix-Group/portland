@@ -32,10 +32,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) return false;
-      const user = await res.json();
-      setUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      return true;
+          const data = await res.json();
+          // data: { user, token }
+          setUser(data.user);
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          localStorage.setItem('token', data.token);
+          return true;
     } catch (e) {
       return false;
     }
