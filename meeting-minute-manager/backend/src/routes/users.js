@@ -23,6 +23,9 @@ router.post('/', async (req, res) => {
     if (!name || !email || !password || !role) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
+    if (!['ADMIN', 'USER'].includes(role)) {
+      return res.status(400).json({ error: 'Rol inválido' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
@@ -44,7 +47,11 @@ router.post('/', async (req, res) => {
 
 // PUT update user
 router.put('/:id', async (req, res) => {
-  const user = await prisma.user.update({ where: { id: req.params.id }, data: req.body });
+  const { role, ...rest } = req.body;
+  if (role && !['ADMIN', 'USER'].includes(role)) {
+    return res.status(400).json({ error: 'Rol inválido' });
+  }
+  const user = await prisma.user.update({ where: { id: req.params.id }, data: { ...rest, ...(role ? { role } : {}) } });
   res.json(user);
 });
 

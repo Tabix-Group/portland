@@ -20,7 +20,8 @@ model Minute {
   tags Json
   files Json
   status String
-  createdBy String
+  createdBy   User?   @relation("MinuteCreatedBy", fields: [createdById], references: [id])
+  createdById String?
   createdAt DateTime @default(now())
   projectIds String[]
   externalMentions  String[]
@@ -45,13 +46,18 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      String
+  role      Role     @default(USER)
   isActive  Boolean  @default(true)
   projectIds String[]
   hasLimitedAccess Boolean? 
   projects  Project[] @relation("UserProjects")
   minutes   MinuteItem[]
   tasks     Task[]
+  createdMinutes Minute[] @relation("MinuteCreatedBy")
+}
+enum Role {
+  ADMIN
+  USER
 }
 
 model Project {
