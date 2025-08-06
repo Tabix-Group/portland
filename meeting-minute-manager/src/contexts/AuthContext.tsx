@@ -20,7 +20,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsed = JSON.parse(savedUser);
+      // Normalizar role a lowercase
+      parsed.role = parsed.role?.toLowerCase();
+      setUser(parsed);
     }
   }, []);
 
@@ -34,8 +37,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!res.ok) return false;
           const data = await res.json();
           // data: { user, token }
-          setUser(data.user);
-          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          // Normalizar role a lowercase para frontend
+          const normalizedUser = { ...data.user, role: data.user.role.toLowerCase() } as AuthUser;
+          setUser(normalizedUser);
+          localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
           localStorage.setItem('token', data.token);
           return true;
     } catch (e) {
@@ -46,6 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
   };
 
   return (
