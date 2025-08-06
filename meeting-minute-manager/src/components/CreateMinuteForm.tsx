@@ -79,6 +79,10 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Detectar qué botón de envío fue clicado para asignar estado
+    const submitter = (e.nativeEvent as any).submitter as HTMLButtonElement | undefined;
+    const statusValue = submitter?.getAttribute('value') as 'draft' | 'published' | undefined;
+    const finalStatus = statusValue || formData.status;
     const participantIds = Array.isArray(formData.participantIds) ? formData.participantIds : [];
     const occasionalParticipants = Array.isArray(formData.occasionalParticipants) ? formData.occasionalParticipants : [];
     if (!formData.title || !formData.meetingDate || ((Array.isArray(participantIds) ? participantIds : []).length === 0 && (Array.isArray(occasionalParticipants) ? occasionalParticipants : []).length === 0)) {
@@ -149,7 +153,7 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
       internalNotes: formData.internalNotes,
       tags: formData.tags,
       files: formData.files,
-      status: formData.status,
+      status: finalStatus,
       createdBy: user?.id || '',
       createdAt: new Date().toISOString(),
       projectIds: formData.projectIds,
