@@ -350,19 +350,6 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="status">Estado de la minuta *</Label>
-              <select
-                id="status"
-                value={formData.status}
-                onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
-                className="block w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:outline-none focus:ring focus:ring-blue-200"
-                required
-              >
-                <option value="draft">Borrador</option>
-                <option value="published">Publicado</option>
-              </select>
-            </div>
 
             <ProjectSelector
               projects={userProjects}

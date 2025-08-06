@@ -559,8 +559,8 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                         )}
                       </div>
                     </div>
-                    {/* Botones admin: editar/borrar */}
-                    {user?.role === 'admin' && (
+                    {/* Botones admin o creador de borrador: editar/borrar */}
+                    {(user?.role === 'admin' || (minute.createdBy === user?.id && minute.status === 'draft')) && (
                       <div className="absolute top-4 right-4 flex gap-2 opacity-80 group-hover:opacity-100">
                         <Button size="sm" variant="outline" onClick={() => handleEditMinute(minute)}>
                           Editar
