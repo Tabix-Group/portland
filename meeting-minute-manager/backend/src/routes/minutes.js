@@ -117,11 +117,14 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT update minute (solo admin o dueño)
-router.put('/:id', authenticateToken, authorizeAdminOrOwner(async req => {
+// PUT update minute (solo admin o dueño y solo borrador para usuarios)
+router.put('/:id', authenticateToken, async (req, res, next) => {
   const minute = await prisma.minute.findUnique({ where: { id: req.params.id } });
-  return minute?.createdById;
-}), async (req, res) => {
+  if (req.user.role === 'ADMIN' || (minute?.createdById === req.user.id && minute?.status === 'draft')) {
+    return next();
+  }
+  return res.status(403).json({ error: 'No autorizado' });
+}, async (req, res) => {
   const { tasks, ...minuteData } = req.body;
   const minute = await prisma.minute.update({ where: { id: req.params.id }, data: minuteData });
   await prisma.task.deleteMany({ where: { minuteId: req.params.id } });
