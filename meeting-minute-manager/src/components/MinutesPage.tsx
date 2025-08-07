@@ -224,14 +224,17 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         nextMeetingNotes: editMinute.nextMeetingNotes || '',
         // Participant and JSON fields
         participantIds: editParticipantIds,
-        participants: editMinute.participants || [],
+        // Persist participant objects from IDs
+        participants: users.filter(u => editParticipantIds.includes(u.id)),
         occasionalParticipants: editMinute.occasionalParticipants || [],
         informedPersons: editMinute.informedPersons || [],
-        topicGroups: editMinute.topicGroups || [],
+        // Persist updated topic groups
+        topicGroups: allTopicGroups.filter(g => editTopicGroupIds.includes(g.id)),
         topicsDiscussed: editMinute.topicsDiscussed || [],
         decisions: editMinute.decisions || [],
         internalNotes: editMinute.internalNotes || '',
-        tags: editMinute.tags || [],
+        // Persist updated tags
+        tags: allTags.filter(tag => editTagIds.includes(tag.id)),
         files: editMinute.files || [],
         status: editStatus as 'draft' | 'published',
         projectIds: editProjectIds,
