@@ -22,9 +22,15 @@ interface CreateMinuteFormProps {
   selectedTemplate?: MinuteTemplate | null;
 }
 
-const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, selectedTemplate }) => {
+interface CreateMinuteFormProps {
+  onBack: () => void;
+  onSuccess: () => void;
+  selectedTemplate?: MinuteTemplate | null;
+  editMinute?: any;
+}
+const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, selectedTemplate, editMinute }) => {
   const { user } = useAuth();
-  const { users, projects, minutes, addMinute } = useData();
+  const { users, projects, minutes, addMinute, updateMinute } = useData();
   const { toast } = useToast();
   
   // Obtener fecha y hora actuales
@@ -35,27 +41,50 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
   // Calcular el próximo número de minuta
   const nextMinuteNumber = Math.max(0, ...(Array.isArray(minutes) ? minutes : []).map(m => m.number || 0)) + 1;
 
-  const [formData, setFormData] = useState({
-    title: selectedTemplate?.name || '',
-    meetingDate: today,
-    meetingTime: currentTime,
-    nextMeetingDate: '',
-    nextMeetingTime: '',
-    nextMeetingNotes: '',
-    participantIds: Array.isArray(user?.id ? [user.id] : []) ? (user?.id ? [user.id] : []) : [],
-    occasionalParticipants: [],
-    informedPersons: [] as InformedPerson[],
-    topicGroups: [],
-    // Mantener compatibilidad con versión anterior
-    topicsDiscussed: [{ id: '1', text: '', mentions: [], projectIds: [] }],
-    decisions: [{ id: '1', text: '', mentions: [], projectIds: [] }],
-    pendingTasks: [{ id: '1', text: '', assignedTo: '', dueDate: '', completed: false, mentions: [], projectIds: [] }],
-    internalNotes: '',
-    tags: [],
-    files: [],
-    projectIds: Array.isArray(selectedTemplate?.projectIds) ? selectedTemplate?.projectIds : [],
-    status: 'draft' as 'draft' | 'published',
-  });
+  // Initialize form data for create or edit
+  const initialFormData = editMinute
+    ? {
+        title: editMinute.title || '',
+        meetingDate: editMinute.meetingDate?.slice(0,10) || today,
+        meetingTime: editMinute.meetingTime || currentTime,
+        nextMeetingDate: editMinute.nextMeetingDate || '',
+        nextMeetingTime: editMinute.nextMeetingTime || '',
+        nextMeetingNotes: editMinute.nextMeetingNotes || '',
+        participantIds: Array.isArray(editMinute.participantIds) ? editMinute.participantIds : [],
+        occasionalParticipants: Array.isArray(editMinute.occasionalParticipants) ? editMinute.occasionalParticipants : [],
+        informedPersons: Array.isArray(editMinute.informedPersons) ? editMinute.informedPersons : [],
+        topicGroups: Array.isArray(editMinute.topicGroups) ? editMinute.topicGroups : [],
+        topicsDiscussed: Array.isArray(editMinute.topicsDiscussed) ? editMinute.topicsDiscussed : [],
+        decisions: Array.isArray(editMinute.decisions) ? editMinute.decisions : [],
+        pendingTasks: Array.isArray(editMinute.pendingTasks) ? editMinute.pendingTasks : [],
+        internalNotes: editMinute.internalNotes || '',
+        tags: Array.isArray(editMinute.tags) ? editMinute.tags : [],
+        files: Array.isArray(editMinute.files) ? editMinute.files : [],
+        projectIds: Array.isArray(editMinute.projectIds) ? editMinute.projectIds : [],
+        status: editMinute.status as 'draft' | 'published',
+      }
+    : {
+        title: selectedTemplate?.name || '',
+        meetingDate: today,
+        meetingTime: currentTime,
+        nextMeetingDate: '',
+        nextMeetingTime: '',
+        nextMeetingNotes: '',
+        participantIds: user?.id ? [user.id] : [],
+        occasionalParticipants: [],
+        informedPersons: [] as InformedPerson[],
+        topicGroups: [],
+        // Mantener compatibilidad con versión anterior
+        topicsDiscussed: [{ id: '1', text: '', mentions: [], projectIds: [] }],
+        decisions: [{ id: '1', text: '', mentions: [], projectIds: [] }],
+        pendingTasks: [{ id: '1', text: '', assignedTo: '', dueDate: '', completed: false, mentions: [], projectIds: [] }],
+        internalNotes: '',
+        tags: [],
+        files: [],
+        projectIds: Array.isArray(selectedTemplate?.projectIds) ? selectedTemplate?.projectIds : [],
+        status: 'draft' as 'draft' | 'published',
+      };
+  const [formData, setFormData] = useState(initialFormData);
 
   // Refuerzo: si topicGroups se inicializa manualmente, asegurar arrays internos
   React.useEffect(() => {
@@ -162,11 +191,13 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
 
     // Guardar la minuta y mostrar feedback
     (async () => {
-      await addMinute(minute);
-      toast({
-        title: "Minuta creada",
-        description: `La minuta #${nextMinuteNumber} ha sido creada exitosamente`,
-      });
+      if (editMinute) {
+        await updateMinute(editMinute.id, { ...minute });
+        toast({ title: "Minuta actualizada", description: `La minuta #${editMinute.number} ha sido actualizada` });
+      } else {
+        await addMinute(minute);
+        toast({ title: "Minuta creada", description: `La minuta #${nextMinuteNumber} ha sido creada exitosamente` });
+      }
       onSuccess();
     })();
   };
