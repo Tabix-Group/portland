@@ -192,7 +192,10 @@ const CreateMinuteForm: React.FC<CreateMinuteFormProps> = ({ onBack, onSuccess, 
     // Guardar la minuta y mostrar feedback
     (async () => {
       if (editMinute) {
-        await updateMinute(editMinute.id, { ...minute });
+        // Remove fields not allowed in update (relations)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { createdBy, createdAt, ...updatePayload } = minute;
+        await updateMinute(editMinute.id, updatePayload as any);
         toast({ title: "Minuta actualizada", description: `La minuta #${editMinute.number} ha sido actualizada` });
       } else {
         await addMinute(minute);
