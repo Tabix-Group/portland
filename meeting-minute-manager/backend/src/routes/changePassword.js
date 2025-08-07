@@ -4,17 +4,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
-// Middleware para requerir autenticación (ejemplo, ajusta según tu auth real)
-function requireAuth(req, res, next) {
-  // Suponiendo que el userId está en req.user.id (ajusta según tu auth)
+
+// POST /api/users/change-password
+router.post('/', async (req, res) => {
   if (!req.user || !req.user.id) {
     return res.status(401).json({ error: 'No autenticado' });
   }
-  next();
-}
-
-// POST /api/users/change-password
-router.post('/', requireAuth, async (req, res) => {
   const userId = req.user.id;
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword) {

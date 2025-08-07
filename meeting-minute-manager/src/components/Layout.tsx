@@ -61,10 +61,10 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
                 variant="outline"
                 size="sm"
                 onClick={() => setShowChangePassword(true)}
-                className="flex items-center space-x-2"
+                className="flex items-center justify-center"
+                title="Cambiar contraseña"
               >
                 <KeyRound className="h-4 w-4" />
-                <span>Cambiar contraseña</span>
               </Button>
               <Button
                 variant="outline"
