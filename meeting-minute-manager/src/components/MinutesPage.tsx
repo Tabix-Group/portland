@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo, useRef } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,7 +49,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const [editStep, setEditStep] = useState<number>(1);
   const { updateMinute, deleteMinute } = useData();
   const { toast } = useToast();
-  const editTitleRef = useRef<HTMLInputElement>(null);
+  const [editTitle, setEditTitle] = useState<string>("");
   const [editStatus, setEditStatus] = useState<string>(editMinute?.status || 'draft');
   const [editDate, setEditDate] = useState<string>(editMinute ? editMinute.meetingDate?.slice(0, 10) : '');
   const [editProjectIds, setEditProjectIds] = useState<string[]>(editMinute?.projectIds || []);
@@ -188,6 +188,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const [editTasks, setEditTasks] = useState<any[]>([]);
   const handleEditMinute = (minute: Minute) => {
     setEditMinute(minute);
+    setEditTitle(minute.title);
     setEditStep(1);
     setEditStatus(minute.status || 'draft');
     setEditDate(minute.meetingDate?.slice(0, 10) || '');
@@ -202,7 +203,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
 
   const handleEditSave = async () => {
     if (!editMinute) return;
-    const newTitle = editTitleRef.current?.value || editMinute.title;
+    const newTitle = editTitle;
     // Limpiar y validar tareas antes de enviar
     const cleanedTasks = editTasks
       .filter(t => t && typeof t.text === 'string' && t.text.trim() !== '')
@@ -536,7 +537,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                         <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-4 w-4" />
-                            <span>{new Date(minute.meetingDate).toLocaleDateString()}</span>
+                            <span>{minute.meetingDate}</span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Users className="h-4 w-4" />
@@ -607,7 +608,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
           {editStep === 1 && (
             <div className="space-y-4">
               <label className="block text-sm font-medium">Título</label>
-              <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
+              <Input value={editTitle} onChange={e => setEditTitle(e.target.value)} className="w-full" />
 
               <label className="block text-sm font-medium">Estado</label>
               <Select value={editStatus} onValueChange={setEditStatus}>
