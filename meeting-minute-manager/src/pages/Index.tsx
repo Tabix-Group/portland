@@ -18,6 +18,7 @@ const AppContent = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [selectedMinuteId, setSelectedMinuteId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MinuteTemplate | null>(null);
+  const [editMinute, setEditMinute] = useState<any | null>(null);
 
   if (!isAuthenticated) {
     return <LoginForm />;
@@ -25,6 +26,7 @@ const AppContent = () => {
 
   const handleCreateMinute = () => {
     console.log("Creating minute...");
+    setEditMinute(null);
     setCurrentPage('template-selector');
   };
 
@@ -37,6 +39,10 @@ const AppContent = () => {
     console.log(`Viewing minute with ID: ${id}`);
     setSelectedMinuteId(id);
     setCurrentPage('view-minute');
+  };
+  const handleEditMinute = (minute: any) => {
+    setEditMinute(minute);
+    setCurrentPage('create-minute');
   };
 
   const handleBackToDashboard = () => {
@@ -55,10 +61,11 @@ const AppContent = () => {
     switch (currentPage) {
       case 'minutes':
         return (
-          <MinutesPage 
-            onCreateMinute={handleCreateMinute}
-            onViewMinute={handleViewMinute}
-          />
+        <MinutesPage 
+          onCreateMinute={handleCreateMinute}
+          onViewMinute={handleViewMinute}
+          onEditMinute={handleEditMinute}
+        />
         );
       case 'template-selector':
         return (
@@ -70,9 +77,24 @@ const AppContent = () => {
       case 'create-minute':
         return (
           <CreateMinuteForm 
-            onBack={() => setCurrentPage('template-selector')}
-            onSuccess={handleBackToDashboard}
+            onBack={() => {
+              if (editMinute) {
+                setEditMinute(null);
+                setCurrentPage('minutes');
+              } else {
+                setCurrentPage('template-selector');
+              }
+            }}
+            onSuccess={() => {
+              if (editMinute) {
+                setEditMinute(null);
+                setCurrentPage('minutes');
+              } else {
+                handleBackToDashboard();
+              }
+            }}
             selectedTemplate={selectedTemplate}
+            editMinute={editMinute}
           />
         );
       case 'view-minute':

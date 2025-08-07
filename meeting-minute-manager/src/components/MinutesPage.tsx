@@ -32,9 +32,10 @@ import { useToast } from '@/hooks/use-toast';
 interface MinutesPageProps {
   onCreateMinute: () => void
   onViewMinute: (id: string) => void
+  onEditMinute: (minute: Minute) => void
 }
 
-const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute }) => {
+const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute, onEditMinute }) => {
   const { user } = useAuth()
   const { minutes, projects, users } = useData()
   const [searchTerm, setSearchTerm] = useState("")
@@ -576,7 +577,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
                     {/* Botones admin o creador de borrador: editar/borrar */}
                     {(user?.role === 'admin' || (minute.createdBy === user?.id && minute.status === 'draft')) && (
                       <div className="absolute top-4 right-4 flex gap-2 opacity-80 group-hover:opacity-100">
-                        <Button size="sm" variant="outline" onClick={() => handleEditMinute(minute)}>
+                        <Button size="sm" variant="outline" onClick={() => onEditMinute(minute)}>
                           Editar
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => handleDeleteMinute(minute)}>
