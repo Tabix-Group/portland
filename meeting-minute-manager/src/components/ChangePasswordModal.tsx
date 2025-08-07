@@ -3,6 +3,7 @@ import Modal from '@/components/ui/Modal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { BASE_URL } from '@/lib/api';
 
 interface ChangePasswordModalProps {
   open: boolean;
@@ -30,7 +31,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ open, onClose
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/users/change-password', {
+      const res = await fetch(`${BASE_URL}/users/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
