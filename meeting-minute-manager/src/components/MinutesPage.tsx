@@ -214,6 +214,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
       }));
     try {
       await updateMinute(editMinute.id, {
+        // Minute scalar fields
         number: editMinute.number,
         title: newTitle,
         meetingDate: editDate,
@@ -221,6 +222,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         nextMeetingDate: editMinute.nextMeetingDate || '',
         nextMeetingTime: editMinute.nextMeetingTime || '',
         nextMeetingNotes: editMinute.nextMeetingNotes || '',
+        // Participant and JSON fields
         participantIds: editParticipantIds,
         participants: editMinute.participants || [],
         occasionalParticipants: editMinute.occasionalParticipants || [],
@@ -232,8 +234,6 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
         tags: editMinute.tags || [],
         files: editMinute.files || [],
         status: editStatus as 'draft' | 'published',
-        createdBy: editMinute.createdBy || '',
-        createdAt: editMinute.createdAt || new Date().toISOString(),
         projectIds: editProjectIds,
         externalMentions: editMinute.externalMentions || [],
         // Enviar tareas limpias (SQL) al backend
