@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, FileText, Settings, ClipboardList } from 'lucide-react';
+import { LogOut, FileText, Settings, ClipboardList, KeyRound } from 'lucide-react';
+import ChangePasswordModal from './ChangePasswordModal';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) => {
   const { user, logout } = useAuth();
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const navigation = [
     { id: 'dashboard', label: 'Dashboard', icon: FileText },
@@ -58,6 +60,15 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setShowChangePassword(true)}
+                className="flex items-center space-x-2"
+              >
+                <KeyRound className="h-4 w-4" />
+                <span>Cambiar contraseña</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={logout}
                 className="flex items-center space-x-2"
               >
@@ -71,6 +82,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onPageChange }) 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
+      <ChangePasswordModal open={showChangePassword} onClose={() => setShowChangePassword(false)} />
     </div>
   );
 };
