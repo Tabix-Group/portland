@@ -46,6 +46,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const [topicGroupSelectorOpen, setTopicGroupSelectorOpen] = useState(false)
   const [editMinute, setEditMinute] = useState<Minute | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Minute | null>(null);
+  const [editStep, setEditStep] = useState<number>(1);
   const { updateMinute, deleteMinute } = useData();
   const { toast } = useToast();
   const editTitleRef = useRef<HTMLInputElement>(null);
@@ -187,6 +188,7 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
   const [editTasks, setEditTasks] = useState<any[]>([]);
   const handleEditMinute = (minute: Minute) => {
     setEditMinute(minute);
+    setEditStep(1);
     setEditStatus(minute.status || 'draft');
     setEditDate(minute.meetingDate?.slice(0, 10) || '');
     setEditProjectIds(minute.projectIds || []);
@@ -592,154 +594,184 @@ const MinutesPage: React.FC<MinutesPageProps> = ({ onCreateMinute, onViewMinute 
           <DialogHeader>
             <DialogTitle>Editar Minuta</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            {/* TAREAS REALES (SQL) */}
-            <label className="block text-sm font-medium">Tareas</label>
-            <div className="space-y-2">
-              {editTasks.map((task, idx) => {
-                // Normalizar valores para evitar undefined/null
-                // Usar 'none' para evitar value="" en SelectItem (Radix error)
-                const assignedTo = typeof task.assignedTo === 'string' && task.assignedTo !== '' ? task.assignedTo : 'none';
-                const groupId = typeof task.groupId === 'string' && task.groupId !== '' ? task.groupId : 'none';
-                return (
-                  <div key={task.id || idx} className="flex items-center gap-2">
-                    <Input
-                      className="flex-1"
-                      value={task.text || ''}
-                      placeholder="Descripción de la tarea"
-                      onChange={e => {
-                        const newTasks = [...editTasks];
-                        newTasks[idx] = { ...task, text: e.target.value };
-                        setEditTasks(newTasks);
-                      }}
-                    />
-                    <Select
-                      value={assignedTo}
-                      onValueChange={v => {
-                        const newTasks = [...editTasks];
-                        newTasks[idx] = { ...task, assignedTo: v === 'none' ? '' : v };
-                        setEditTasks(newTasks);
-                      }}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Asignado a" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sin asignar</SelectItem>
-                        {users.filter(u => typeof u.id === 'string' && u.id).map(u => (
-                          <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {/* Grupo de tema para la tarea */}
-                    <Select
-                      value={groupId}
-                      onValueChange={v => {
-                        const newTasks = [...editTasks];
-                        newTasks[idx] = { ...task, groupId: v === 'none' ? '' : v };
-                        setEditTasks(newTasks);
-                      }}
-                    >
-                      <SelectTrigger className="w-36">
-                        <SelectValue placeholder="Agrupador" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sin agrupador</SelectItem>
-                        {allTopicGroups.filter(group => typeof group.id === 'string' && group.id).map(group => (
-                          <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button size="sm" variant="destructive" onClick={() => setEditTasks(editTasks.filter((_, i) => i !== idx))}>Eliminar</Button>
-                  </div>
-                );
-              })}
-              <Button size="sm" variant="outline" onClick={() => setEditTasks([
-                ...editTasks,
-                { text: '', assignedTo: 'none', completed: false, groupId: 'none' }
-              ])}>Agregar tarea</Button>
+          {/* Wizard Steps */}
+          <ul className="flex justify-between mb-4">
+            <li className={`flex-1 px-2 py-1 text-center rounded ${editStep === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>1. Básicos</li>
+            <li className={`flex-1 px-2 py-1 text-center rounded ${editStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>2. Detalles</li>
+            <li className={`flex-1 px-2 py-1 text-center rounded ${editStep === 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>3. Tareas</li>
+          </ul>
+
+          {editStep === 1 && (
+            <div className="space-y-4">
+              <label className="block text-sm font-medium">Título</label>
+              <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
+
+              <label className="block text-sm font-medium">Estado</label>
+              <Select value={editStatus} onValueChange={setEditStatus}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Borrador</SelectItem>
+                  <SelectItem value="published">Publicada</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <label className="block text-sm font-medium">Fecha de reunión</label>
+              <input
+                type="date"
+                className="w-full border rounded px-2 py-1"
+                value={editDate}
+                onChange={e => setEditDate(e.target.value)}
+              />
             </div>
-            <label className="block text-sm font-medium">Título</label>
-            <input ref={editTitleRef} defaultValue={editMinute?.title} className="w-full border rounded px-2 py-1" />
+          )}
 
-            <label className="block text-sm font-medium">Estado</label>
-            <Select value={editStatus} onValueChange={setEditStatus}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Borrador</SelectItem>
-                <SelectItem value="published">Publicada</SelectItem>
-              </SelectContent>
-            </Select>
+          {editStep === 2 && (
+            <div className="space-y-4">
+              <label className="block text-sm font-medium">Proyecto(s)</label>
+              <Select
+                value={editProjectIds[0] || ''}
+                onValueChange={v => setEditProjectIds([v])}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar proyecto" />
+                </SelectTrigger>
+                <SelectContent>
+                  {userProjects.map(project => (
+                    <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <label className="block text-sm font-medium">Fecha de reunión</label>
-            <input
-              type="date"
-              className="w-full border rounded px-2 py-1"
-              value={editDate}
-              onChange={e => setEditDate(e.target.value)}
-            />
-
-            <label className="block text-sm font-medium">Proyecto(s)</label>
-            <Select
-              value={editProjectIds[0] || ''}
-              onValueChange={v => setEditProjectIds([v])}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar proyecto" />
-              </SelectTrigger>
-              <SelectContent>
-                {userProjects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+              <label className="block text-sm font-medium">Etiquetas</label>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map(tag => (
+                  <Badge
+                    key={tag.id}
+                    className={`cursor-pointer ${editTagIds.includes(tag.id) ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                    style={{ backgroundColor: editTagIds.includes(tag.id) ? tag.color : undefined }}
+                    onClick={() => setEditTagIds(editTagIds.includes(tag.id) ? editTagIds.filter(id => id !== tag.id) : [...editTagIds, tag.id])}
+                  >
+                    {tag.name}
+                  </Badge>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
 
-            <label className="block text-sm font-medium">Etiquetas</label>
-            <div className="flex flex-wrap gap-2">
-              {allTags.map(tag => (
-                <Badge
-                  key={tag.id}
-                  className={`cursor-pointer ${editTagIds.includes(tag.id) ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  style={{ backgroundColor: editTagIds.includes(tag.id) ? tag.color : undefined }}
-                  onClick={() => setEditTagIds(editTagIds.includes(tag.id) ? editTagIds.filter(id => id !== tag.id) : [...editTagIds, tag.id])}
-                >
-                  {tag.name}
-                </Badge>
-              ))}
-            </div>
+              <label className="block text-sm font-medium">Agrupadores</label>
+              <div className="flex flex-wrap gap-2">
+                {allTopicGroups.map(group => (
+                  <Badge
+                    key={group.id}
+                    className={`cursor-pointer ${editTopicGroupIds.includes(group.id) ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                    style={{ backgroundColor: editTopicGroupIds.includes(group.id) ? group.color : undefined }}
+                    onClick={() => setEditTopicGroupIds(editTopicGroupIds.includes(group.id) ? editTopicGroupIds.filter(id => id !== group.id) : [...editTopicGroupIds, group.id])}
+                  >
+                    {group.name}
+                  </Badge>
+                ))}
+              </div>
 
-            <label className="block text-sm font-medium">Agrupadores</label>
-            <div className="flex flex-wrap gap-2">
-              {allTopicGroups.map(group => (
-                <Badge
-                  key={group.id}
-                  className={`cursor-pointer ${editTopicGroupIds.includes(group.id) ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  style={{ backgroundColor: editTopicGroupIds.includes(group.id) ? group.color : undefined }}
-                  onClick={() => setEditTopicGroupIds(editTopicGroupIds.includes(group.id) ? editTopicGroupIds.filter(id => id !== group.id) : [...editTopicGroupIds, group.id])}
-                >
-                  {group.name}
-                </Badge>
-              ))}
+              <label className="block text-sm font-medium">Participantes</label>
+              <div className="flex flex-wrap gap-2">
+                {users.map(u => (
+                  <Badge
+                    key={u.id}
+                    className={`cursor-pointer ${editParticipantIds.includes(u.id) ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+                    onClick={() => setEditParticipantIds(editParticipantIds.includes(u.id) ? editParticipantIds.filter(id => id !== u.id) : [...editParticipantIds, u.id])}
+                  >
+                    {u.name}
+                  </Badge>
+                ))}
+              </div>
             </div>
+          )}
 
-            <label className="block text-sm font-medium">Participantes</label>
-            <div className="flex flex-wrap gap-2">
-              {users.map(u => (
-                <Badge
-                  key={u.id}
-                  className={`cursor-pointer ${editParticipantIds.includes(u.id) ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-                  onClick={() => setEditParticipantIds(editParticipantIds.includes(u.id) ? editParticipantIds.filter(id => id !== u.id) : [...editParticipantIds, u.id])}
-                >
-                  {u.name}
-                </Badge>
-              ))}
+          {editStep === 3 && (
+            <div className="space-y-4">
+              <label className="block text-sm font-medium">Tareas</label>
+              <div className="space-y-2">
+                {editTasks.map((task, idx) => {
+                  // Normalizar valores para evitar undefined/null
+                  // Usar 'none' para evitar value="" en SelectItem (Radix error)
+                  const assignedTo = typeof task.assignedTo === 'string' && task.assignedTo !== '' ? task.assignedTo : 'none';
+                  const groupId = typeof task.groupId === 'string' && task.groupId !== '' ? task.groupId : 'none';
+                  return (
+                    <div key={task.id || idx} className="flex items-center gap-2">
+                      <Input
+                        className="flex-1"
+                        value={task.text || ''}
+                        placeholder="Descripción de la tarea"
+                        onChange={e => {
+                          const newTasks = [...editTasks];
+                          newTasks[idx] = { ...task, text: e.target.value };
+                          setEditTasks(newTasks);
+                        }}
+                      />
+                      <Select
+                        value={assignedTo}
+                        onValueChange={v => {
+                          const newTasks = [...editTasks];
+                          newTasks[idx] = { ...task, assignedTo: v === 'none' ? '' : v };
+                          setEditTasks(newTasks);
+                        }}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder="Asignado a" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sin asignar</SelectItem>
+                          {users.filter(u => typeof u.id === 'string' && u.id).map(u => (
+                            <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {/* Grupo de tema para la tarea */}
+                      <Select
+                        value={groupId}
+                        onValueChange={v => {
+                          const newTasks = [...editTasks];
+                          newTasks[idx] = { ...task, groupId: v === 'none' ? '' : v };
+                          setEditTasks(newTasks);
+                        }}
+                      >
+                        <SelectTrigger className="w-36">
+                          <SelectValue placeholder="Agrupador" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sin agrupador</SelectItem>
+                          {allTopicGroups.filter(group => typeof group.id === 'string' && group.id).map(group => (
+                            <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button size="sm" variant="destructive" onClick={() => setEditTasks(editTasks.filter((_, i) => i !== idx))}>Eliminar</Button>
+                    </div>
+                  );
+                })}
+                <Button size="sm" variant="outline" onClick={() => setEditTasks([
+                  ...editTasks,
+                  { text: '', assignedTo: 'none', completed: false, groupId: 'none' }
+                ])}>Agregar tarea</Button>
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditMinute(null)}>Cancelar</Button>
-            <Button onClick={handleEditSave}>Guardar</Button>
+          )}
+
+          <DialogFooter className="flex justify-between w-full">
+            <div>
+              {editStep > 1 ? (
+                <Button variant="outline" onClick={() => setEditStep(editStep - 1)}>Anterior</Button>
+              ) : (
+                <Button variant="outline" onClick={() => setEditMinute(null)}>Cancelar</Button>
+              )}
+            </div>
+            <div>
+              {editStep < 3 ? (
+                <Button onClick={() => setEditStep(editStep + 1)}>Siguiente</Button>
+              ) : (
+                <Button onClick={handleEditSave}>Guardar</Button>
+              )}
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
