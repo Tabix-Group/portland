@@ -12,6 +12,7 @@ import { Plus, Edit, Trash, Search, X, FolderOpen } from 'lucide-react';
 import { User, Project, MinuteTemplate, Tag, GlobalTopicGroup } from '@/types';
 import ProjectSelector from './Settings/ProjectSelector';
 import TagSelector from './TagSelector';
+import UserPasswordFields from './Settings/UserPasswordFields';
 
 const PREDEFINED_COLORS = [
   '#ef4444', // red
@@ -271,12 +272,11 @@ const Settings: React.FC = () => {
                             <option value="admin">Administrador</option>
                           </select>
                         </div>
-                        
+                        <UserPasswordFields userId={user.id} />
                         <ProjectSelector
                           user={user}
                           onUpdateUser={(updates) => updateUser(user.id, updates)}
                         />
-                        
                         <div className="flex justify-end space-x-2">
                           <Button variant="ghost" onClick={() => setEditingUser(null)}>
                             Cancelar

@@ -20,6 +20,7 @@ app.use('/api/tags', require('./routes/tags'));
 app.use('/api/templates', require('./routes/templates'));
 app.use('/api/globalTopicGroups', require('./routes/globalTopicGroups'));
 app.use('/api/users/change-password', authenticateToken, require('./routes/changePassword'));
+app.use('/api/users', authenticateToken, require('./routes/adminChangePassword'));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
