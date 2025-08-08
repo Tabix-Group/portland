@@ -35,10 +35,13 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [newGroupColor, setNewGroupColor] = useState(TOPIC_GROUP_COLORS[0]);
+  // Estado para controlar los agrupadores abiertos
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(topicGroups.map(g => g.id));
 
   const createTopicGroupFromGlobal = (globalGroup: GlobalTopicGroup) => {
+    const newId = `tg-${Date.now()}`;
     const newGroup: TopicGroup = {
-      id: `tg-${Date.now()}`,
+      id: newId,
       name: globalGroup.name,
       color: globalGroup.color,
       description: globalGroup.description,
@@ -47,6 +50,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
       pendingTasks: [{ id: `pt-${Date.now()}`, text: '', assignedTo: '', dueDate: '', completed: false, mentions: [], projectIds: [] }]
     };
     onTopicGroupsChange([...topicGroups, newGroup]);
+    setExpandedGroups(prev => [...prev, newId]);
   };
 
   const createCustomTopicGroup = () => {
@@ -61,8 +65,9 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
       addGlobalTopicGroup(globalGroup);
 
       // Crear en la minuta actual
+      const newId = `tg-${Date.now()}`;
       const newGroup: TopicGroup = {
-        id: `tg-${Date.now()}`,
+        id: newId,
         name: newGroupName.trim(),
         color: newGroupColor,
         description: newGroupDescription.trim(),
@@ -70,8 +75,8 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
         decisions: [{ id: `d-${Date.now()}`, text: '', mentions: [], projectIds: [] }],
         pendingTasks: [{ id: `pt-${Date.now()}`, text: '', assignedTo: '', dueDate: '', completed: false, mentions: [], projectIds: [] }]
       };
-      
       onTopicGroupsChange([...topicGroups, newGroup]);
+      setExpandedGroups(prev => [...prev, newId]);
       setNewGroupName('');
       setNewGroupDescription('');
       setNewGroupColor(TOPIC_GROUP_COLORS[0]);
@@ -248,7 +253,7 @@ const TopicGroupManager: React.FC<TopicGroupManagerProps> = ({
           <p className="text-sm">Selecciona uno existente o crea uno nuevo</p>
         </div>
       ) : (
-        <Accordion type="multiple" className="space-y-2">
+        <Accordion type="multiple" className="space-y-2" value={expandedGroups} onValueChange={setExpandedGroups}>
           {(Array.isArray(topicGroups) ? topicGroups : []).map((group) => (
             <AccordionItem key={group.id} value={group.id} className="border rounded-lg">
               <AccordionTrigger className="px-4 hover:no-underline">
