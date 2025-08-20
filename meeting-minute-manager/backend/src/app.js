@@ -22,6 +22,7 @@ app.use('/api/globalTopicGroups', require('./routes/globalTopicGroups'));
 app.use('/api/users/change-password', authenticateToken, require('./routes/changePassword'));
 app.use('/api/users', authenticateToken, require('./routes/adminChangePassword'));
 app.use('/api/test-email', require('./routes/testEmail'));
+app.use('/api/smtp-check', require('./routes/smtpCheck'));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
