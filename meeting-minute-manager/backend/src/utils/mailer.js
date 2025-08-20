@@ -10,7 +10,18 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  logger: true,
+  debug: true,
+  tls: {
+    // allow self-signed in environments where intermediate certs may be missing
+    rejectUnauthorized: false,
+  },
 });
+
+// Verify transporter at startup so logs show auth/connect issues early
+transporter.verify()
+  .then(() => console.log('SMTP OK — transporter verified'))
+  .catch(err => console.error('SMTP verify failed:', err));
 
 function safeArr(arr) {
   return Array.isArray(arr) ? arr : [];
