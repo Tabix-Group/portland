@@ -4,6 +4,7 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { authenticateToken, authorizeAdminOrOwner } = require('../middleware/auth');
+const { sendMinuteNotification } = require('../utils/mailer');
 
 // GET tasks for a minute
 router.get('/:id/tasks', async (req, res) => {
@@ -85,6 +86,12 @@ router.post('/', authenticateToken, async (req, res) => {
       for (const task of tasks) {
         await prisma.task.create({ data: { ...task, minuteId: minute.id } });
       }
+    }
+    // Enviar notificación por mail en background (no bloquea la respuesta)
+    try {
+      sendMinuteNotification({ minute, prisma }).catch(err => console.error('Background mail error:', err));
+    } catch (err) {
+      console.error('Error iniciando envío de mail:', err);
     }
     // ...existing code...
     const safe = arr => Array.isArray(arr) ? arr : [];
