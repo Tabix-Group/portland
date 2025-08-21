@@ -117,11 +117,13 @@ function _renderText(item) {
   const preferred = (appUrl || process.env.APP_URL || process.env.FRONTEND_URL || process.env.PUBLIC_URL || '').toString();
   let base = preferred ? preferred.replace(/\/+$/, '') : '';
   if (!base) {
-    // Fallback to localhost:3000 when no frontend URL is configured (avoid relative links in emails)
-    const fallbackHost = process.env.FRONTEND_FALLBACK || 'http://localhost:3000';
+    // Fallback to production domain or localhost
+    const fallbackHost = process.env.FRONTEND_FALLBACK || 'https://memmo.ai';
     base = fallbackHost.replace(/\/+$/, '');
   }
   const minuteUrl = `${base}/minutes/${minute.id}`;
+
+  console.log(`[MAILER] 🔗 Generated minute URL: ${minuteUrl}`);
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
@@ -166,7 +168,7 @@ function _renderText(item) {
   `;
 }
 
-async function sendMinuteNotification({ minute, prisma }) {
+async function sendMinuteNotification({ minute, prisma, appUrl }) {
   console.log(`[MAILER] Starting notification for minute ${minute.id}: "${minute.title}"`);
 
   // Ensure transporter is initialized
@@ -184,8 +186,9 @@ async function sendMinuteNotification({ minute, prisma }) {
 
     console.log(`[MAILER] 📧 Sending to ${to.length} recipients:`, to);
 
-    const appUrl = process.env.APP_URL || '';
-    const html = buildMinuteHtml({ minute, appUrl });
+    // Use appUrl parameter or fall back to environment variable
+    const finalAppUrl = appUrl || process.env.APP_URL || '';
+    const html = buildMinuteHtml({ minute, appUrl: finalAppUrl });
 
     const mailOptions = {
       from: process.env.EMAIL_FROM || process.env.SMTP_USER,

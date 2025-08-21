@@ -126,7 +126,13 @@ router.post('/', authenticateToken, async (req, res) => {
             creatorName = user?.name || '';
           }
           const minuteForMail = await normalizeMinuteForMailer({ ...minute, createdBy: creatorName || minute.createdBy });
-          sendMinuteNotification({ minute: minuteForMail, prisma }).catch(err => console.error('Background mail error:', err));
+
+          // Try to get the frontend URL from the request headers (if available)
+          const requestHost = req.get('host');
+          const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
+          const appUrl = process.env.APP_URL || (requestHost ? `${protocol}://${requestHost.replace(':3001', ':3000')}` : '');
+
+          sendMinuteNotification({ minute: minuteForMail, prisma, appUrl }).catch(err => console.error('Background mail error:', err));
         } catch (err) {
           console.error('Error preparing minute for mail:', err);
         }
@@ -197,7 +203,13 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
           creatorName = user?.name || '';
         }
         const minuteForMail = await normalizeMinuteForMailer({ ...minute, createdBy: creatorName || minute.createdBy });
-        sendMinuteNotification({ minute: minuteForMail, prisma }).catch(err => console.error('Background mail error:', err));
+
+        // Try to get the frontend URL from the request headers (if available)
+        const requestHost = req.get('host');
+        const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
+        const appUrl = process.env.APP_URL || (requestHost ? `${protocol}://${requestHost.replace(':3001', ':3000')}` : '');
+
+        sendMinuteNotification({ minute: minuteForMail, prisma, appUrl }).catch(err => console.error('Background mail error:', err));
       } catch (err) {
         console.error('Error preparing minute for mail on update:', err);
       }
