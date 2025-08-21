@@ -121,8 +121,7 @@ function _renderText(item) {
     const fallbackHost = process.env.FRONTEND_FALLBACK || 'https://www.memmo.ai';
     base = fallbackHost.replace(/\/+$/, '');
   }
-  // For simplicity direct the email link to memmo.ai (can be overridden with MEMMO_URL)
-  const minuteUrl = (process.env.MEMMO_URL || 'https://www.memmo.ai').replace(/\/\/+$/, '');
+  const minuteUrl = `${base}/minutes/${minute.id}`;
 
   console.log(`[MAILER] 🔗 Generated minute URL: ${minuteUrl}`);
   console.log(`[MAILER] 📝 Using base URL: ${base}`);
@@ -134,7 +133,8 @@ function _renderText(item) {
       <h2>Minuta: ${_renderText(minute.title) || 'Sin título'}</h2>
       <p><strong>Fecha:</strong> ${_renderText(minute.meetingDate)} ${_renderText(minute.meetingTime)}</p>
       <p><strong>Creada por:</strong> ${_renderText(minute.createdBy)}</p>
-      <p><a href="${minuteUrl}">Ver minuta completa</a></p>
+  <p><a href="${minuteUrl}">Ver minuta completa</a></p>
+  <p><a href="https://www.memmo.ai" target="_blank" rel="noopener">Visitar memmo.ai</a></p>
       ${(Array.isArray(minute.topicGroups) && minute.topicGroups.length > 0)
       ? minute.topicGroups.map(g => `
           <h3 style="margin-top:18px;">${_renderText(g.name) || 'Agrupador'}</h3>
