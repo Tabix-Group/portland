@@ -6,6 +6,33 @@ const prisma = new PrismaClient();
 const { authenticateToken, authorizeAdminOrOwner } = require('../middleware/auth');
 const { sendMinuteNotification } = require('../utils/mailer');
 
+// Shared helpers: ensure arrays and normalized minute shape for mailer
+const safe = arr => Array.isArray(arr) ? arr : [];
+async function normalizeMinuteForMailer(minute) {
+  if (!minute) return minute;
+  const norm = { ...minute };
+  norm.topicGroups = safe(norm.topicGroups).map((g) => ({
+    ...g,
+    topicsDiscussed: safe(g.topicsDiscussed),
+    decisions: safe(g.decisions),
+    pendingTasks: safe(g.pendingTasks)
+  }));
+  norm.topicsDiscussed = safe(norm.topicsDiscussed);
+  norm.decisions = safe(norm.decisions);
+  norm.pendingTasks = safe(norm.pendingTasks);
+  norm.participants = safe(norm.participants);
+  norm.occasionalParticipants = safe(norm.occasionalParticipants);
+  norm.informedPersons = safe(norm.informedPersons);
+  norm.tags = safe(norm.tags);
+  norm.files = safe(norm.files);
+  norm.projectIds = safe(norm.projectIds);
+  norm.participantIds = safe(norm.participantIds);
+  norm.externalMentions = safe(norm.externalMentions);
+  // Ensure createdBy contains a human-friendly value (may be id in DB)
+  if (!norm.createdBy && norm.createdById) norm.createdBy = norm.createdById;
+  return norm;
+}
+
 // GET tasks for a minute
 router.get('/:id/tasks', async (req, res) => {
   const tasks = await prisma.task.findMany({ where: { minuteId: req.params.id } });
@@ -91,7 +118,18 @@ router.post('/', authenticateToken, async (req, res) => {
     try {
       const status = (minute?.status || '').toString().toLowerCase();
       if (status === 'published') {
-        sendMinuteNotification({ minute, prisma }).catch(err => console.error('Background mail error:', err));
+        try {
+          // Resolve creator name (if available) and normalize minute shape for mailer
+          let creatorName = '';
+          if (minute.createdById) {
+            const user = await prisma.user.findUnique({ where: { id: minute.createdById }, select: { name: true } });
+            creatorName = user?.name || '';
+          }
+          const minuteForMail = await normalizeMinuteForMailer({ ...minute, createdBy: creatorName || minute.createdBy });
+          sendMinuteNotification({ minute: minuteForMail, prisma }).catch(err => console.error('Background mail error:', err));
+        } catch (err) {
+          console.error('Error preparing minute for mail:', err);
+        }
       } else {
         console.log(`[MINUTES] Minute ${minute.id} created with status='${minute.status}' — skipping email`);
       }
@@ -152,7 +190,17 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
     const prevStatus = (prev?.status || '').toString().toLowerCase();
     const newStatus = (minute?.status || '').toString().toLowerCase();
     if (prevStatus !== 'published' && newStatus === 'published') {
-      sendMinuteNotification({ minute, prisma }).catch(err => console.error('Background mail error:', err));
+      try {
+        let creatorName = '';
+        if (minute.createdById) {
+          const user = await prisma.user.findUnique({ where: { id: minute.createdById }, select: { name: true } });
+          creatorName = user?.name || '';
+        }
+        const minuteForMail = await normalizeMinuteForMailer({ ...minute, createdBy: creatorName || minute.createdBy });
+        sendMinuteNotification({ minute: minuteForMail, prisma }).catch(err => console.error('Background mail error:', err));
+      } catch (err) {
+        console.error('Error preparing minute for mail on update:', err);
+      }
     } else {
       console.log(`[MINUTES] Minute ${minute.id} updated status from='${prev?.status}' to='${minute?.status}' — skipping email`);
     }

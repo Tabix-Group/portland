@@ -113,10 +113,15 @@ function _renderText(item) {
   }
   return `${item}`;
 } function buildMinuteHtml({ minute, appUrl }) {
-  // Build the correct URL for the minute view - use the actual routing path without hash
-  const base = appUrl ? appUrl.replace(/\/+$/, '') : '';
-  // Based on the screenshot, the correct path is /minutes/:id (no hash)
-  const minuteUrl = base ? `${base}/minutes/${minute.id}` : `/minutes/${minute.id}`;
+  // Build the correct URL for the minute view - prefer a fully qualified frontend URL.
+  const preferred = (appUrl || process.env.APP_URL || process.env.FRONTEND_URL || process.env.PUBLIC_URL || '').toString();
+  let base = preferred ? preferred.replace(/\/+$/, '') : '';
+  if (!base) {
+    // Fallback to localhost:3000 when no frontend URL is configured (avoid relative links in emails)
+    const fallbackHost = process.env.FRONTEND_FALLBACK || 'http://localhost:3000';
+    base = fallbackHost.replace(/\/+$/, '');
+  }
+  const minuteUrl = `${base}/minutes/${minute.id}`;
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
