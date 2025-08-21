@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { DataProvider } from '@/contexts/DataContext';
 import LoginForm from '@/components/LoginForm';
@@ -19,6 +20,17 @@ const AppContent = () => {
   const [selectedMinuteId, setSelectedMinuteId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MinuteTemplate | null>(null);
   const [editMinute, setEditMinute] = useState<any | null>(null);
+
+  // If route contains /minutes/:id, open that minute view when authenticated
+  const params = useParams();
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (params?.id) {
+      setSelectedMinuteId(params.id as string);
+      setCurrentPage('view-minute');
+    }
+  }, [isAuthenticated, params]);
 
   if (!isAuthenticated) {
     return <LoginForm />;
@@ -61,11 +73,11 @@ const AppContent = () => {
     switch (currentPage) {
       case 'minutes':
         return (
-        <MinutesPage 
-          onCreateMinute={handleCreateMinute}
-          onViewMinute={handleViewMinute}
-          onEditMinute={handleEditMinute}
-        />
+          <MinutesPage
+            onCreateMinute={handleCreateMinute}
+            onViewMinute={handleViewMinute}
+            onEditMinute={handleEditMinute}
+          />
         );
       case 'template-selector':
         return (
@@ -76,7 +88,7 @@ const AppContent = () => {
         );
       case 'create-minute':
         return (
-          <CreateMinuteForm 
+          <CreateMinuteForm
             onBack={() => {
               if (editMinute) {
                 setEditMinute(null);
@@ -109,7 +121,7 @@ const AppContent = () => {
         return (
           <div className="text-center py-8">
             <p className="text-gray-500">Minuta no encontrada</p>
-            <button 
+            <button
               onClick={handleBackToDashboard}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
@@ -121,7 +133,7 @@ const AppContent = () => {
         return <Settings />;
       default:
         return (
-          <Dashboard 
+          <Dashboard
             onCreateMinute={handleCreateMinute}
             onViewMinute={handleViewMinute}
           />

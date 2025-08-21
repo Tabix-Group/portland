@@ -129,18 +129,39 @@ function _renderText(item) {
       <p><strong>Fecha:</strong> ${_renderText(minute.meetingDate)} ${_renderText(minute.meetingTime)}</p>
       <p><strong>Creada por:</strong> ${_renderText(minute.createdBy)}</p>
       <p><a href="${minuteUrl}">Ver minuta completa</a></p>
-      <h3>Temas</h3>
-      <ul>
-        ${safeArr(minute.topicsDiscussed).map(t => `<li>${_renderText(t)}</li>`).join('')}
-      </ul>
-      <h3>Decisiones</h3>
-      <ul>
-        ${safeArr(minute.decisions).map(d => `<li>${_renderText(d)}</li>`).join('')}
-      </ul>
-      <h3>Tareas</h3>
-      <ul>
-        ${safeArr(minute.pendingTasks).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('')}
-      </ul>
+      ${(Array.isArray(minute.topicGroups) && minute.topicGroups.length > 0)
+      ? minute.topicGroups.map(g => `
+          <h3 style="margin-top:18px;">${_renderText(g.name) || 'Agrupador'}</h3>
+          <div style="margin-left:6px;">
+            <strong>Temas Tratados</strong>
+            <ul>
+              ${safeArr(g.topicsDiscussed).map(t => `<li>${_renderText(t)}</li>`).join('')}
+            </ul>
+            <strong>Decisiones</strong>
+            <ul>
+              ${safeArr(g.decisions).map(d => `<li>${_renderText(d)}</li>`).join('')}
+            </ul>
+            <strong>Tareas Pendientes</strong>
+            <ul>
+              ${safeArr(g.pendingTasks).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('')}
+            </ul>
+          </div>
+        `).join('')
+      : `
+          <h3>Temas</h3>
+          <ul>
+            ${safeArr(minute.topicsDiscussed).map(t => `<li>${_renderText(t)}</li>`).join('')}
+          </ul>
+          <h3>Decisiones</h3>
+          <ul>
+            ${safeArr(minute.decisions).map(d => `<li>${_renderText(d)}</li>`).join('')}
+          </ul>
+          <h3>Tareas</h3>
+          <ul>
+            ${safeArr(minute.pendingTasks).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('')}
+          </ul>
+        `
+    }
     </div>
   `;
 }
