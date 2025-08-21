@@ -113,17 +113,10 @@ function _renderText(item) {
   }
   return `${item}`;
 } function buildMinuteHtml({ minute, appUrl }) {
-  // Try different URL formats - the app seems to use hash routing based on the Not Found error
+  // Build the correct URL for the minute view - use the actual routing path without hash
   const base = appUrl ? appUrl.replace(/\/+$/, '') : '';
-
-  // Try multiple URL formats to find the one that works
-  let minuteUrl;
-  if (base) {
-    // Try hash-based routing first (common in React apps)
-    minuteUrl = `${base}/#/minutes/${minute.id}`;
-  } else {
-    minuteUrl = `/#/minutes/${minute.id}`;
-  }
+  // Based on the screenshot, the correct path is /minutes/:id (no hash)
+  const minuteUrl = base ? `${base}/minutes/${minute.id}` : `/minutes/${minute.id}`;
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
@@ -133,15 +126,15 @@ function _renderText(item) {
       <p><a href="${minuteUrl}">Ver minuta completa</a></p>
       <h3>Temas</h3>
       <ul>
-        ${safeArr(minute.topicsDiscussed).filter(t => _renderText(t)).map(t => `<li>${_renderText(t)}</li>`).join('') || '<li>(Sin temas especificados)</li>'}
+        ${safeArr(minute.topicsDiscussed).map(t => `<li>${_renderText(t)}</li>`).join('')}
       </ul>
       <h3>Decisiones</h3>
       <ul>
-        ${safeArr(minute.decisions).filter(d => _renderText(d)).map(d => `<li>${_renderText(d)}</li>`).join('') || '<li>(Sin decisiones especificadas)</li>'}
+        ${safeArr(minute.decisions).map(d => `<li>${_renderText(d)}</li>`).join('')}
       </ul>
       <h3>Tareas</h3>
       <ul>
-        ${safeArr(minute.pendingTasks).filter(ts => _renderText(ts)).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('') || '<li>(Sin tareas especificadas)</li>'}
+        ${safeArr(minute.pendingTasks).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('')}
       </ul>
     </div>
   `;
