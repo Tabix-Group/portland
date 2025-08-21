@@ -117,13 +117,16 @@ function _renderText(item) {
   const preferred = (appUrl || process.env.APP_URL || process.env.FRONTEND_URL || process.env.PUBLIC_URL || '').toString();
   let base = preferred ? preferred.replace(/\/+$/, '') : '';
   if (!base) {
-    // Fallback to production domain or localhost
-    const fallbackHost = process.env.FRONTEND_FALLBACK || 'https://memmo.ai';
+    // Fallback to production domain - usar www.memmo.ai según Railway config
+    const fallbackHost = process.env.FRONTEND_FALLBACK || 'https://www.memmo.ai';
     base = fallbackHost.replace(/\/+$/, '');
   }
   const minuteUrl = `${base}/minutes/${minute.id}`;
 
   console.log(`[MAILER] 🔗 Generated minute URL: ${minuteUrl}`);
+  console.log(`[MAILER] 📝 Using base URL: ${base}`);
+  console.log(`[MAILER] 🌍 APP_URL from env: ${process.env.APP_URL}`);
+  console.log(`[MAILER] 🌍 FRONTEND_URL from env: ${process.env.FRONTEND_URL}`);
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">

@@ -130,7 +130,10 @@ router.post('/', authenticateToken, async (req, res) => {
           // Try to get the frontend URL from the request headers (if available)
           const requestHost = req.get('host');
           const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
-          const appUrl = process.env.APP_URL || (requestHost ? `${protocol}://${requestHost.replace(':3001', ':3000')}` : '');
+          const appUrl = process.env.APP_URL || process.env.FRONTEND_URL || (requestHost ? `${protocol}://${requestHost.replace(':3001', ':3000')}` : '');
+
+          console.log(`[MINUTES] 🔗 Sending notification with appUrl: ${appUrl}`);
+          console.log(`[MINUTES] 🌍 Request host: ${requestHost}, Protocol: ${protocol}`);
 
           sendMinuteNotification({ minute: minuteForMail, prisma, appUrl }).catch(err => console.error('Background mail error:', err));
         } catch (err) {
@@ -207,7 +210,9 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
         // Try to get the frontend URL from the request headers (if available)
         const requestHost = req.get('host');
         const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
-        const appUrl = process.env.APP_URL || (requestHost ? `${protocol}://${requestHost.replace(':3001', ':3000')}` : '');
+        const appUrl = process.env.APP_URL || process.env.FRONTEND_URL || (requestHost ? `${protocol}://${requestHost.replace(':3001', ':3000')}` : '');
+
+        console.log(`[MINUTES] 🔗 Sending update notification with appUrl: ${appUrl}`);
 
         sendMinuteNotification({ minute: minuteForMail, prisma, appUrl }).catch(err => console.error('Background mail error:', err));
       } catch (err) {
