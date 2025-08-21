@@ -90,11 +90,15 @@ function _renderText(item) {
   if (typeof item === 'object') {
     // Handle the specific structure from the logs: { id: '1', text: '', mentions: [], projectIds: [] }
     if (item.text !== undefined) {
-      // If text is empty, check if there are mentions or other content
-      if (item.text.trim() === '' && item.mentions && Array.isArray(item.mentions) && item.mentions.length > 0) {
-        return item.mentions.map(m => typeof m === 'string' ? m : (m.text || m.name || JSON.stringify(m))).join(', ');
+      // If text is empty, return a placeholder instead of empty string
+      if (!item.text || item.text.trim() === '') {
+        // Check if there are mentions or other content
+        if (item.mentions && Array.isArray(item.mentions) && item.mentions.length > 0) {
+          return item.mentions.map(m => typeof m === 'string' ? m : (m.text || m.name || JSON.stringify(m))).join(', ');
+        }
+        return '(Sin contenido especificado)';
       }
-      return item.text || '';
+      return item.text;
     }
 
     // Fallback to other text fields
@@ -105,16 +109,21 @@ function _renderText(item) {
     if (item.email) return item.email;
 
     // If it's an empty object or all fields are empty, return placeholder
-    return 'Sin contenido';
+    return '(Sin contenido especificado)';
   }
   return `${item}`;
-}
-
-function buildMinuteHtml({ minute, appUrl }) {
-  // Build the correct URL for the minute view - use the actual routing path without hash
+} function buildMinuteHtml({ minute, appUrl }) {
+  // Try different URL formats - the app seems to use hash routing based on the Not Found error
   const base = appUrl ? appUrl.replace(/\/+$/, '') : '';
-  // Based on the screenshot, the correct path is /minutes/:id (no hash)
-  const minuteUrl = base ? `${base}/minutes/${minute.id}` : `/minutes/${minute.id}`;
+
+  // Try multiple URL formats to find the one that works
+  let minuteUrl;
+  if (base) {
+    // Try hash-based routing first (common in React apps)
+    minuteUrl = `${base}/#/minutes/${minute.id}`;
+  } else {
+    minuteUrl = `/#/minutes/${minute.id}`;
+  }
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
@@ -124,15 +133,15 @@ function buildMinuteHtml({ minute, appUrl }) {
       <p><a href="${minuteUrl}">Ver minuta completa</a></p>
       <h3>Temas</h3>
       <ul>
-        ${safeArr(minute.topicsDiscussed).map(t => `<li>${_renderText(t)}</li>`).join('')}
+        ${safeArr(minute.topicsDiscussed).filter(t => _renderText(t)).map(t => `<li>${_renderText(t)}</li>`).join('') || '<li>(Sin temas especificados)</li>'}
       </ul>
       <h3>Decisiones</h3>
       <ul>
-        ${safeArr(minute.decisions).map(d => `<li>${_renderText(d)}</li>`).join('')}
+        ${safeArr(minute.decisions).filter(d => _renderText(d)).map(d => `<li>${_renderText(d)}</li>`).join('') || '<li>(Sin decisiones especificadas)</li>'}
       </ul>
       <h3>Tareas</h3>
       <ul>
-        ${safeArr(minute.pendingTasks).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('')}
+        ${safeArr(minute.pendingTasks).filter(ts => _renderText(ts)).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('') || '<li>(Sin tareas especificadas)</li>'}
       </ul>
     </div>
   `;
