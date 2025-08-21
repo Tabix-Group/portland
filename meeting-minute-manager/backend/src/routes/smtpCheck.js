@@ -5,7 +5,7 @@ const net = require('net');
 // GET /api/smtp-check
 router.get('/', async (req, res) => {
     const host = process.env.SMTP_HOST;
-    const port = Number(process.env.SMTP_PORT || 465);
+    const port = Number(process.env.SMTP_PORT || 587);
     const timeoutMs = 10000;
 
     if (!host) return res.status(400).json({ error: 'SMTP_HOST not configured' });

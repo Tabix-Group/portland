@@ -35,7 +35,7 @@ async function createVerifiedTransporter() {
   for (const { port, secure, name } of configs) {
     console.log(`[MAILER] 🔄 Trying ${name}...`);
     const testTransporter = createTransporter(port, secure);
-    
+
     try {
       await testTransporter.verify();
       console.log(`[MAILER] ✅ Success with ${name} - using this configuration`);
@@ -53,9 +53,10 @@ async function createVerifiedTransporter() {
 
 // Initialize transporter with fallback
 let transporter;
-(async () => {
+async function initMailer() {
   transporter = await createVerifiedTransporter();
-})();
+  return transporter;
+}
 
 function safeArr(arr) {
   return Array.isArray(arr) ? arr : [];
@@ -110,13 +111,13 @@ function buildMinuteHtml({ minute, appUrl }) {
 
 async function sendMinuteNotification({ minute, prisma }) {
   console.log(`[MAILER] Starting notification for minute ${minute.id}: "${minute.title}"`);
-  
+
   // Ensure transporter is initialized
   if (!transporter) {
     console.error('[MAILER] ❌ Transporter not initialized, creating fallback...');
     transporter = createTransporter();
   }
-  
+
   try {
     const to = await gatherRecipientEmails({ minute, prisma });
     if (!to || !to.length) {
@@ -137,7 +138,7 @@ async function sendMinuteNotification({ minute, prisma }) {
     };
 
     console.log(`[MAILER] 📤 Sending mail from: ${mailOptions.from}`);
-    
+
     const info = await transporter.sendMail(mailOptions);
 
     console.log(`[MAILER] ✅ Email sent successfully!`, {
@@ -159,10 +160,11 @@ async function sendMinuteNotification({ minute, prisma }) {
 
     // Provide specific guidance based on error type
     if (err.code === 'EAUTH') {
-      console.error('[MAILER] 🔑 Authentication failed - check your Titan/GoDaddy credentials:');
-      console.error('  - SMTP_USER should be: noreply@memmo.ai');
-      console.error('  - SMTP_PASS should be your app-specific password (not web login password)');
-      console.error('  - If you have 2FA enabled, generate an app password in your email settings');
+      console.error('[MAILER] 🔑 Authentication failed - check your Office365 / Exchange credentials and mailbox settings:');
+      console.error('  - SMTP_USER should be the full mailbox: noreply@memmo.ai');
+      console.error('  - SMTP_PASS should be the mailbox password (or app password if your tenant requires it)');
+      console.error('  - Ensure SMTP AUTH is enabled for this mailbox in Exchange settings');
+      console.error('  - If your tenant blocks basic auth, consider using Microsoft Graph API (OAuth) or a transactional provider');
       console.error('  - Try logging into webmail to ensure account is not locked');
     }
 
@@ -171,7 +173,8 @@ async function sendMinuteNotification({ minute, prisma }) {
 }
 
 // Export additional utilities for testing
-module.exports = { 
+module.exports = {
+  initMailer,
   sendMinuteNotification,
   createTransporter,  // for testing different configs
   gatherRecipientEmails  // for testing recipient gathering
