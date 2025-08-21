@@ -87,14 +87,9 @@ router.post('/', authenticateToken, async (req, res) => {
         await prisma.task.create({ data: { ...task, minuteId: minute.id } });
       }
     }
-    // Enviar notificación por mail en background sólo si la minuta quedó publicada
+    // Enviar notificación por mail en background (no bloquea la respuesta)
     try {
-      const status = (minute?.status || '').toString().toLowerCase();
-      if (status === 'published') {
-        sendMinuteNotification({ minute, prisma }).catch(err => console.error('Background mail error:', err));
-      } else {
-        console.log(`[MINUTES] Minute ${minute.id} created with status='${minute.status}' — skipping email`);
-      }
+      sendMinuteNotification({ minute, prisma }).catch(err => console.error('Background mail error:', err));
     } catch (err) {
       console.error('Error iniciando envío de mail:', err);
     }
@@ -138,26 +133,12 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
   return res.status(403).json({ error: 'No autorizado' });
 }, async (req, res) => {
   const { tasks, ...minuteData } = req.body;
-  // fetch previous state to detect status transition
-  const prev = await prisma.minute.findUnique({ where: { id: req.params.id } });
   const minute = await prisma.minute.update({ where: { id: req.params.id }, data: minuteData });
   await prisma.task.deleteMany({ where: { minuteId: req.params.id } });
   if (Array.isArray(tasks)) {
     for (const task of tasks) {
       await prisma.task.create({ data: { ...task, minuteId: req.params.id } });
     }
-  }
-  // If the minute transitioned from non-published -> published, send notifications
-  try {
-    const prevStatus = (prev?.status || '').toString().toLowerCase();
-    const newStatus = (minute?.status || '').toString().toLowerCase();
-    if (prevStatus !== 'published' && newStatus === 'published') {
-      sendMinuteNotification({ minute, prisma }).catch(err => console.error('Background mail error:', err));
-    } else {
-      console.log(`[MINUTES] Minute ${minute.id} updated status from='${prev?.status}' to='${minute?.status}' — skipping email`);
-    }
-  } catch (err) {
-    console.error('Error iniciando envío de mail en update:', err);
   }
   // ...existing code...
   const safe = arr => Array.isArray(arr) ? arr : [];
