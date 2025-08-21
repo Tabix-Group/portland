@@ -88,34 +88,24 @@ function _renderText(item) {
   if (!item && item !== 0) return '';
   if (typeof item === 'string' || typeof item === 'number') return `${item}`;
   if (typeof item === 'object') {
-    // Handle different object structures based on the JSON in the email
-    if (item.text) return item.text;
+    // Handle the specific structure from the logs: { id: '1', text: '', mentions: [], projectIds: [] }
+    if (item.text !== undefined) {
+      // If text is empty, check if there are mentions or other content
+      if (item.text.trim() === '' && item.mentions && Array.isArray(item.mentions) && item.mentions.length > 0) {
+        return item.mentions.map(m => typeof m === 'string' ? m : (m.text || m.name || JSON.stringify(m))).join(', ');
+      }
+      return item.text || '';
+    }
+
+    // Fallback to other text fields
     if (item.title) return item.title;
     if (item.description) return item.description;
     if (item.content) return item.content;
-
-    // Handle mentions array
-    if (item.mentions && Array.isArray(item.mentions)) {
-      return item.mentions.map(m => typeof m === 'string' ? m : (m.text || m.name || JSON.stringify(m))).join(', ');
-    }
-
-    // Handle projectIds array
-    if (item.projectIds && Array.isArray(item.projectIds)) {
-      return item.projectIds.join(', ');
-    }
-
-    // For objects that might be user references or other complex data
     if (item.name) return item.name;
     if (item.email) return item.email;
 
-    // If it's a simple object with just a few properties, try to extract meaningful text
-    const keys = Object.keys(item);
-    if (keys.length === 1 && typeof item[keys[0]] === 'string') {
-      return item[keys[0]];
-    }
-
-    // Last resort: return empty string instead of JSON to avoid clutter
-    return '';
+    // If it's an empty object or all fields are empty, return placeholder
+    return 'Sin contenido';
   }
   return `${item}`;
 }
@@ -150,11 +140,6 @@ function buildMinuteHtml({ minute, appUrl }) {
 
 async function sendMinuteNotification({ minute, prisma }) {
   console.log(`[MAILER] Starting notification for minute ${minute.id}: "${minute.title}"`);
-  console.log(`[MAILER] Minute data structure:`, {
-    topicsDiscussed: minute.topicsDiscussed?.slice(0, 1), // Log first item to see structure
-    decisions: minute.decisions?.slice(0, 1),
-    pendingTasks: minute.pendingTasks?.slice(0, 1)
-  });
 
   // Ensure transporter is initialized
   if (!transporter) {
