@@ -88,19 +88,43 @@ function _renderText(item) {
   if (!item && item !== 0) return '';
   if (typeof item === 'string' || typeof item === 'number') return `${item}`;
   if (typeof item === 'object') {
-    // Try multiple properties that could contain the display text
-    return item.text || item.title || item.description || item.content ||
-      (item.mentions && Array.isArray(item.mentions) ? item.mentions.map(m => m.text || m).join(', ') : '') ||
-      JSON.stringify(item);
+    // Handle different object structures based on the JSON in the email
+    if (item.text) return item.text;
+    if (item.title) return item.title;
+    if (item.description) return item.description;
+    if (item.content) return item.content;
+
+    // Handle mentions array
+    if (item.mentions && Array.isArray(item.mentions)) {
+      return item.mentions.map(m => typeof m === 'string' ? m : (m.text || m.name || JSON.stringify(m))).join(', ');
+    }
+
+    // Handle projectIds array
+    if (item.projectIds && Array.isArray(item.projectIds)) {
+      return item.projectIds.join(', ');
+    }
+
+    // For objects that might be user references or other complex data
+    if (item.name) return item.name;
+    if (item.email) return item.email;
+
+    // If it's a simple object with just a few properties, try to extract meaningful text
+    const keys = Object.keys(item);
+    if (keys.length === 1 && typeof item[keys[0]] === 'string') {
+      return item[keys[0]];
+    }
+
+    // Last resort: return empty string instead of JSON to avoid clutter
+    return '';
   }
   return `${item}`;
 }
 
 function buildMinuteHtml({ minute, appUrl }) {
-  // Build the correct URL for the minute view
+  // Build the correct URL for the minute view - use the actual routing path without hash
   const base = appUrl ? appUrl.replace(/\/+$/, '') : '';
-  // Use the format that matches your frontend routing
-  const minuteUrl = base ? `${base}/#/minutes/${minute.id}` : `/#/minutes/${minute.id}`;
+  // Based on the screenshot, the correct path is /minutes/:id (no hash)
+  const minuteUrl = base ? `${base}/minutes/${minute.id}` : `/minutes/${minute.id}`;
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
