@@ -84,26 +84,36 @@ async function gatherRecipientEmails({ minute, prisma }) {
   return Array.from(emails);
 }
 
+function _renderText(item) {
+  if (!item && item !== 0) return '';
+  if (typeof item === 'string' || typeof item === 'number') return `${item}`;
+  if (typeof item === 'object') return item.text || item.title || JSON.stringify(item);
+  return `${item}`;
+}
+
 function buildMinuteHtml({ minute, appUrl }) {
-  const minuteUrl = appUrl ? `${appUrl.replace(/\/+$/, '')}/minutes/${minute.id}` : `#/minutes/${minute.id}`;
+  // If appUrl is not provided, link to login with redirect; else point to absolute minute URL
+  const base = appUrl ? appUrl.replace(/\/+$/, '') : null;
+  const minutePath = `/minutes/${minute.id}`;
+  const minuteUrl = base ? `${base}${minutePath}` : `/login?next=${encodeURIComponent(minutePath)}`;
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
-      <h2>Minuta: ${minute.title || 'Sin título'}</h2>
-      <p><strong>Fecha:</strong> ${minute.meetingDate || ''} ${minute.meetingTime || ''}</p>
-      <p><strong>Creada por:</strong> ${minute.createdBy || ''}</p>
+      <h2>Minuta: ${_renderText(minute.title) || 'Sin título'}</h2>
+      <p><strong>Fecha:</strong> ${_renderText(minute.meetingDate)} ${_renderText(minute.meetingTime)}</p>
+      <p><strong>Creada por:</strong> ${_renderText(minute.createdBy)}</p>
       <p><a href="${minuteUrl}">Ver minuta completa</a></p>
       <h3>Temas</h3>
       <ul>
-        ${safeArr(minute.topicsDiscussed).map(t => `<li>${t?.text || t}</li>`).join('')}
+        ${safeArr(minute.topicsDiscussed).map(t => `<li>${_renderText(t)}</li>`).join('')}
       </ul>
       <h3>Decisiones</h3>
       <ul>
-        ${safeArr(minute.decisions).map(d => `<li>${d?.text || d}</li>`).join('')}
+        ${safeArr(minute.decisions).map(d => `<li>${_renderText(d)}</li>`).join('')}
       </ul>
       <h3>Tareas</h3>
       <ul>
-        ${safeArr(minute.pendingTasks).map(ts => `<li>${ts?.text || ts} ${ts?.dueDate ? `- Fecha: ${ts.dueDate}` : ''}</li>`).join('')}
+        ${safeArr(minute.pendingTasks).map(ts => `<li>${_renderText(ts)} ${ts?.dueDate ? `- Fecha: ${_renderText(ts.dueDate)}` : ''}</li>`).join('')}
       </ul>
     </div>
   `;
