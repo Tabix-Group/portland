@@ -87,15 +87,20 @@ async function gatherRecipientEmails({ minute, prisma }) {
 function _renderText(item) {
   if (!item && item !== 0) return '';
   if (typeof item === 'string' || typeof item === 'number') return `${item}`;
-  if (typeof item === 'object') return item.text || item.title || JSON.stringify(item);
+  if (typeof item === 'object') {
+    // Try multiple properties that could contain the display text
+    return item.text || item.title || item.description || item.content ||
+      (item.mentions && Array.isArray(item.mentions) ? item.mentions.map(m => m.text || m).join(', ') : '') ||
+      JSON.stringify(item);
+  }
   return `${item}`;
 }
 
 function buildMinuteHtml({ minute, appUrl }) {
-  // If appUrl is not provided, link to login with redirect; else point to absolute minute URL
-  const base = appUrl ? appUrl.replace(/\/+$/, '') : null;
-  const minutePath = `/minutes/${minute.id}`;
-  const minuteUrl = base ? `${base}${minutePath}` : `/login?next=${encodeURIComponent(minutePath)}`;
+  // Build the correct URL for the minute view
+  const base = appUrl ? appUrl.replace(/\/+$/, '') : '';
+  // Use the format that matches your frontend routing
+  const minuteUrl = base ? `${base}/#/minutes/${minute.id}` : `/#/minutes/${minute.id}`;
 
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #111">
@@ -121,6 +126,11 @@ function buildMinuteHtml({ minute, appUrl }) {
 
 async function sendMinuteNotification({ minute, prisma }) {
   console.log(`[MAILER] Starting notification for minute ${minute.id}: "${minute.title}"`);
+  console.log(`[MAILER] Minute data structure:`, {
+    topicsDiscussed: minute.topicsDiscussed?.slice(0, 1), // Log first item to see structure
+    decisions: minute.decisions?.slice(0, 1),
+    pendingTasks: minute.pendingTasks?.slice(0, 1)
+  });
 
   // Ensure transporter is initialized
   if (!transporter) {
