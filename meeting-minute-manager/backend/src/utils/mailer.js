@@ -133,8 +133,7 @@ function _renderText(item) {
       <h2>Minuta: ${_renderText(minute.title) || 'Sin título'}</h2>
       <p><strong>Fecha:</strong> ${_renderText(minute.meetingDate)} ${_renderText(minute.meetingTime)}</p>
       <p><strong>Creada por:</strong> ${_renderText(minute.createdBy)}</p>
-  <p><a href="${minuteUrl}">Ver minuta completa</a></p>
-  <p><a href="https://www.memmo.ai" target="_blank" rel="noopener">Visitar memmo.ai</a></p>
+  <p><a href="https://www.memmo.ai" target="_blank" rel="noopener">Ver en Memmo.ai</a></p>
       ${(Array.isArray(minute.topicGroups) && minute.topicGroups.length > 0)
       ? minute.topicGroups.map(g => `
           <h3 style="margin-top:18px;">${_renderText(g.name) || 'Agrupador'}</h3>
